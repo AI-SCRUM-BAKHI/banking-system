@@ -62,3 +62,25 @@ Push-Location frontend; npm run format:check; npm run lint; npm run typecheck; n
 ```
 
 CI runs these checks independently when files in the corresponding project change.
+
+## Backend authentication and API
+
+Copy `backend/.env.example` to `backend/.env`, then configure these values before starting the backend:
+
+- `DATABASE_URL`: PostgreSQL JDBC URI used by Spring Boot and Flyway.
+- `APP_JWT_SECRET`: base64 encoded random key with at least 32 bytes. Generate with `openssl rand -base64 32`.
+- `APP_SERVICE_TOKEN`: random secret sent as `X-Service-Token` by the trusted fraud detection producer. Generate one with `openssl rand -hex 32`.
+- `APP_BOOTSTRAP_ADMIN_*`: configure all four values to create the first administrator when the `users` table is empty. Use a password with at least 12 characters and at most 72 UTF-8 bytes. These values are ignored after a user exists.
+
+The API is stateless. Login returns a 15 minute access token and a seven day refresh token. Refresh tokens are stored only as SHA-256 hashes and rotate when refreshed. Set a new `APP_JWT_SECRET` only when intentionally invalidating all existing access tokens.
+
+### API groups
+
+| Group | Routes | Access |
+| --- | --- | --- |
+| Authentication | `POST /api/v1/auth/login`, `POST /api/v1/auth/refresh`, `POST /api/v1/auth/logout`, `GET /api/v1/auth/me` | Login and refresh are public; logout and me require a bearer token |
+| User management | `/api/v1/users/**` | `ADMIN`, except `PATCH /api/v1/users/me/password` is available to the signed-in user |
+| Fraud investigation | `/api/v1/fraud-transactions/**` | `ADMIN` and `BANK_USER` |
+| Fraud ingest | `POST /api/v1/fraud-transactions` | Trusted producer with `X-Service-Token: <APP_SERVICE_TOKEN>` |
+
+See [docs/api.md](docs/api.md) for request and response details. Flyway migration V3 adds the refresh-token table. The migration runs automatically on application startup after the database URL and secrets are configured.

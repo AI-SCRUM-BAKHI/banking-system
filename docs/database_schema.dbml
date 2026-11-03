@@ -1,6 +1,6 @@
 Project banking_fraud_detection {
   database_type: 'PostgreSQL'
-  Note: 'Target PostgreSQL schema. Flyway V2 creates the fraud and graph views. Legacy schema_metadata from V1 is omitted from this business model.'
+  Note: 'Target PostgreSQL schema. Flyway V2 creates the fraud and graph views; V3 creates auth_refresh_tokens. Legacy schema_metadata from V1 is omitted from this business model.'
 }
 
 Table users {
@@ -15,6 +15,21 @@ Table users {
   updated_at timestamptz [not null, default: `now()`]
 
   Note: 'Bank employees who can log in to the application.'
+}
+
+Table auth_refresh_tokens {
+  id uuid [pk, note: 'Database default: gen_random_uuid()']
+  user_id uuid [not null]
+  token_hash varchar(64) [not null, unique, note: 'SHA-256 hash; raw refresh tokens are never stored']
+  expires_at timestamptz [not null]
+  revoked_at timestamptz
+  created_at timestamptz [not null, default: `now()`]
+
+  indexes {
+    user_id [name: 'idx_auth_refresh_tokens_user']
+  }
+
+  Note: 'Refresh-token hashes used for rotation and logout. Added by Flyway V3.'
 }
 
 Table fraud_transactions {
@@ -87,4 +102,5 @@ Table transaction_chain {
 
 Ref: fraud_rule_hits.fraud_transaction_id > fraud_transactions.id [delete: cascade]
 Ref: transaction_chain.root_fraud_transaction_id > fraud_transactions.id [delete: cascade]
+Ref: auth_refresh_tokens.user_id > users.id [delete: cascade]
 

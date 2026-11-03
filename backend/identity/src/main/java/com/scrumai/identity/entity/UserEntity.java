@@ -35,6 +35,17 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserEntity {
 
+  public static UserEntity create(
+      String username, String passwordHash, String fullName, String email, UserRole role) {
+    UserEntity user = new UserEntity();
+    user.username = username;
+    user.passwordHash = passwordHash;
+    user.fullName = fullName;
+    user.email = email;
+    user.role = role;
+    return user;
+  }
+
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;

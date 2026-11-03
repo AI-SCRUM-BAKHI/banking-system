@@ -8,14 +8,15 @@ This report describes the application schema in Neon PostgreSQL and the target s
 
 The database supports a basic internal banking fraud-review application.
 
-The database contains four tables:
+The inspected database contained four business tables before authentication was implemented. The target schema adds `auth_refresh_tokens` in Flyway `V3`:
 
 1. `users`
 2. `fraud_transactions`
 3. `fraud_rule_hits`
 4. `transaction_chain`
+5. `auth_refresh_tokens` (target schema, created by `V3`)
 
-The live database inspection found no Flyway history table and no views. Migration `V2` creates the three query views used by the backend and graph frontend. Flyway baselines an existing non-empty database at version 1 before applying `V2`.
+The earlier live database inspection found no Flyway history table and no views. Migration `V2` creates the three query views used by the backend and graph frontend. Migration `V3` adds refresh-token storage. Flyway baselines an existing non-empty database at version 1 before applying pending migrations.
 
 The earlier `V1` migration creates a `schema_metadata` setup table. It is retained to preserve migration history and is not part of the business model; it is absent from the inspected Neon database. A fresh local database will therefore have this additional legacy table.
 
@@ -50,6 +51,21 @@ Stores bank employees who can log in to the application.
 - `users_email_key`: unique `email`.
 - `users_role_check`: allows `ADMIN` or `BANK_USER`.
 - `users_status_check`: allows `ACTIVE` or `DISABLED`.
+
+## 2.1 Target table: `auth_refresh_tokens` (Flyway `V3`)
+
+Stores hashes of refresh tokens so login sessions can rotate tokens and revoke them at logout. The raw token is returned once to the client and is not stored in the database.
+
+| Column | Data type | Key/constraint | Description |
+|---|---|---|---|
+| `id` | UUID | Primary Key | Internal token record identifier |
+| `user_id` | UUID | Foreign Key, Not Null | Owner in `users`; removed when that user is deleted |
+| `token_hash` | VARCHAR(64) | Unique, Not Null | SHA-256 hex digest of the refresh token |
+| `expires_at` | TIMESTAMPTZ | Not Null | Expiration time |
+| `revoked_at` | TIMESTAMPTZ | Nullable | Set when the token is rotated or logged out |
+| `created_at` | TIMESTAMPTZ | Not Null | Record creation time |
+
+**Index:** `idx_auth_refresh_tokens_user` on `user_id`.
 
 ## 3. Table: `fraud_transactions`
 

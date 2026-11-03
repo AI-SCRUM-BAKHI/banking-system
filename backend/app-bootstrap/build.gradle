@@ -7,6 +7,7 @@ dependencies {
     implementation project(':database')
     implementation project(':identity')
     implementation project(':fraud')
+    implementation project(':auth')
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.0'

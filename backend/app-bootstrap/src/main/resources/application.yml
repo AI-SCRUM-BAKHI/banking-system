@@ -25,6 +25,15 @@ server:
 
 app:
   cors-allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173}
+  auth:
+    jwt-secret: ${APP_JWT_SECRET:}
+    jwt-issuer: ${APP_JWT_ISSUER:scrum-ai}
+    service-token: ${APP_SERVICE_TOKEN:}
+    bootstrap-admin:
+      username: ${APP_BOOTSTRAP_ADMIN_USERNAME:}
+      password: ${APP_BOOTSTRAP_ADMIN_PASSWORD:}
+      email: ${APP_BOOTSTRAP_ADMIN_EMAIL:}
+      full-name: ${APP_BOOTSTRAP_ADMIN_FULL_NAME:}
 
 springdoc:
   api-docs:

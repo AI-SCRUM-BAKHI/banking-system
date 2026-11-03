@@ -15,7 +15,6 @@ import jakarta.persistence.UniqueConstraint;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -33,7 +32,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class FraudRuleHitEntity {
 
   @Id
