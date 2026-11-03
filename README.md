@@ -12,6 +12,14 @@ infra/         Local infrastructure, currently PostgreSQL via Docker Compose
 docs/          Product and technical documentation (add as needed)
 ```
 
+The backend keeps persistence entities in their owning Gradle modules:
+
+- `backend/identity`: users, roles and user repository.
+- `backend/fraud`: fraud transactions, rule hits, money-flow chain and repositories.
+- `backend/database`: shared JPA setup, datasource URL handling and Flyway migrations.
+
+The backend reads `backend/.env` when launched from that directory. Copy `.env.example` for local PostgreSQL. Database connection settings use one variable: `DATABASE_URL`, a PostgreSQL connection URI containing the username and password.
+
 ## Run locally
 
 ### Backend
