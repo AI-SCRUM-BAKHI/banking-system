@@ -1,9 +1,18 @@
-name: CI
+name: Backend CI
 
 on:
   push:
     branches: [main]
+    paths: [backend/**, .github/workflows/backend-ci.yml]
   pull_request:
+    paths: [backend/**, .github/workflows/backend-ci.yml]
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: backend
 
 jobs:
   verify:
@@ -15,5 +24,4 @@ jobs:
           distribution: temurin
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
-      - run: bash ./gradlew qualityGate
-      - run: bash ./gradlew :app-bootstrap:bootJar
+      - run: bash ./gradlew --no-daemon clean qualityGate :app-bootstrap:bootJar

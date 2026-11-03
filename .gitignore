@@ -7,3 +7,7 @@ out/
 *.iml
 .env
 reports/
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+frontend/*.tsbuildinfo
