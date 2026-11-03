@@ -1,0 +1,41 @@
+checkstyle {
+    toolVersion = '10.21.4'
+    configFile = rootProject.file('config/checkstyle/checkstyle.xml')
+    ignoreFailures = false
+}
+
+jacoco {
+    toolVersion = '0.8.12'
+}
+
+spotless {
+    lineEndings = 'UNIX'
+    java {
+        googleJavaFormat('1.24.0')
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    format 'misc', {
+        target '*.md', '.editorconfig', '.gitignore', '.gitattributes'
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('spotlessCheck')
+}
+
+tasks.named('jacocoTestReport') {
+    dependsOn tasks.named('test')
+    reports {
+        xml.required = true
+        csv.required = false
+        html.required = true
+    }
+}

@@ -1,0 +1,10 @@
+dependencies {
+    api 'org.springframework:spring-web'
+    api 'org.springframework:spring-context'
+    api 'org.springframework.boot:spring-boot-starter-validation'
+    compileOnly 'jakarta.servlet:jakarta.servlet-api:6.1.0'
+    testCompileOnly 'jakarta.servlet:jakarta.servlet-api:6.1.0'
+    testRuntimeOnly 'jakarta.servlet:jakarta.servlet-api:6.1.0'
+    implementation 'org.slf4j:slf4j-api'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
