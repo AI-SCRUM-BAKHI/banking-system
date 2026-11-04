@@ -32,7 +32,7 @@ afterEach(() => {
     vi.clearAllMocks()
 })
 
-it('opens real login after an admin explores demo and returns to the admin workspace after signing in', async () => {
+it('opens real login for a demo visitor and enters the live workspace after signing in', async () => {
     vi.stubGlobal(
         'IntersectionObserver',
         class {
@@ -41,8 +41,6 @@ it('opens real login after an admin explores demo and returns to the admin works
         },
     )
     vi.stubGlobal('scrollTo', vi.fn())
-    sessionStorage.setItem('aegis.session', JSON.stringify({ mode: 'live', user: admin }))
-    setTokens(tokens)
     window.history.replaceState({}, '', '/')
     const user = userEvent.setup()
     render(<App />)
@@ -64,4 +62,36 @@ it('opens real login after an admin explores demo and returns to the admin works
     expect(login).toHaveBeenCalledWith({ username: 'admin', password: 'example-password' })
     expect(JSON.parse(sessionStorage.getItem('aegis.session')!)).toEqual({ mode: 'live', user: admin })
     expect(getTokens()?.accessToken).toBe('live-access')
+})
+
+it('preserves the admin account across demo, reload and the homepage workspace action', async () => {
+    vi.stubGlobal(
+        'IntersectionObserver',
+        class {
+            observe() {}
+            disconnect() {}
+        },
+    )
+    vi.stubGlobal('scrollTo', vi.fn())
+    sessionStorage.setItem('aegis.session', JSON.stringify({ mode: 'live', user: admin }))
+    setTokens(tokens)
+    window.history.replaceState({}, '', '/')
+    const user = userEvent.setup()
+    const view = render(<App />)
+    expect(screen.queryByRole('link', { name: 'Đăng nhập' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Vào workspace' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Khám phá demo' }))
+    await screen.findByRole('heading', { name: 'Workspace dashboard' })
+    expect(getTokens()?.accessToken).toBe('live-access')
+    expect(JSON.parse(sessionStorage.getItem('aegis.session')!).mode).toBe('demo')
+    expect(screen.getByRole('button', { name: 'Quay về workspace thật' })).toBeInTheDocument()
+    view.unmount()
+    render(<App />)
+    await screen.findByRole('heading', { name: 'Workspace dashboard' })
+    await user.click(screen.getByRole('link', { name: /AEGIS.*FRAUD INTELLIGENCE/ }))
+    await user.click(screen.getByRole('button', { name: 'Vào workspace' }))
+    await screen.findByRole('heading', { name: 'Workspace dashboard' })
+    expect(JSON.parse(sessionStorage.getItem('aegis.session')!)).toEqual({ mode: 'live', user: admin })
+    expect(getTokens()?.accessToken).toBe('live-access')
+    expect(login).not.toHaveBeenCalled()
 })

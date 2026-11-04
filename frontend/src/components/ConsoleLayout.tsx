@@ -32,10 +32,12 @@ export function ConsoleLayout({
     session,
     onLogout,
     notify,
+    onResumeLive,
 }: {
     session: Session
     onLogout: () => void
     notify: (message: string) => void
+    onResumeLive?: () => void
 }) {
     const [menu, setMenu] = useState(false)
     const [caseId, setCaseId] = useState('')
@@ -90,6 +92,18 @@ export function ConsoleLayout({
                     )}
                 </nav>
                 <div className="sidebar-lower">
+                    {session.mode === 'demo' &&
+                        (onResumeLive ? (
+                            <button className="demo-return" onClick={onResumeLive}>
+                                Quay về workspace thật
+                                <ArrowUpRight size={14} />
+                            </button>
+                        ) : (
+                            <Link className="demo-return" to="/login">
+                                Đăng nhập tài khoản thật
+                                <ArrowUpRight size={14} />
+                            </Link>
+                        ))}
                     <div className="sidebar-help">
                         <div className="help-icon">
                             <BookOpen size={19} />
@@ -117,7 +131,11 @@ export function ConsoleLayout({
                             <b>{session.user.fullName}</b>
                             <small>{session.user.role === 'ADMIN' ? 'Administrator' : 'Bank operator'}</small>
                         </div>
-                        <button className="icon-button" aria-label="Đăng xuất" onClick={onLogout}>
+                        <button
+                            className="icon-button"
+                            aria-label={session.mode === 'demo' ? 'Thoát demo' : 'Đăng xuất'}
+                            onClick={onLogout}
+                        >
                             <LogOut size={16} />
                         </button>
                     </div>
