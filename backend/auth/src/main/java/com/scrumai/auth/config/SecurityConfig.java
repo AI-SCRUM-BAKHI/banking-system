@@ -15,8 +15,8 @@ import java.util.Map;
 import java.util.UUID;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -105,7 +105,8 @@ public class SecurityConfig {
       HttpSecurity http,
       UserRepository users,
       ObjectMapper mapper,
-      @Qualifier("corsConfigurationSource") CorsConfigurationSource corsConfigurationSource,
+      @Qualifier("corsConfigurationSource")
+      CorsConfigurationSource corsConfigurationSource,
       @Value("${app.auth.service-token:}") String serviceToken)
       throws Exception {
     http.csrf(csrf -> csrf.disable())

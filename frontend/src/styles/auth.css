@@ -1,0 +1,242 @@
+.login-page {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: #fff;
+}
+.login-story {
+    padding: 42px 48px;
+    background: radial-gradient(ellipse at 50% 80%, #254d7b 0%, #142b4a 45%, #10233e 90%);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 900px;
+}
+.login-story-copy {
+    margin-top: 73px;
+    position: relative;
+    z-index: 2;
+}
+.login-story-copy .pill {
+    font:
+        7px 'IBM Plex Mono',
+        monospace;
+    letter-spacing: 1px;
+    padding: 8px;
+}
+.login-story-copy h1 {
+    font-size: 40px;
+    line-height: 1.35;
+    letter-spacing: -1.4px;
+    color: #e3edfc;
+    font-weight: 500;
+    margin: 23px 0 20px;
+}
+.login-story-copy h1 span {
+    color: #8baadc;
+}
+.login-story-copy p {
+    font-size: 11px;
+    color: #8aa5c7;
+    line-height: 2;
+}
+.login-story .radar-scene {
+    max-width: 500px;
+    align-self: center;
+    aspect-ratio: 600/430;
+    background: none;
+    border: none;
+    box-shadow: none;
+    margin-top: 15px;
+}
+.login-story .scene-header,
+.login-story .scene-footer,
+.login-story .scene-report {
+    display: none;
+}
+.login-story-bottom {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #91aed2;
+    font-size: 9px;
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid #7490b325;
+}
+.login-story-bottom span:last-child {
+    margin-left: auto;
+    font:
+        7px 'IBM Plex Mono',
+        monospace;
+    letter-spacing: 1px;
+    color: #7c97b8;
+}
+.login-form-side {
+    padding: 42px 55px 25px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    color: #8394aa;
+    font-size: 10px;
+}
+.login-form-wrap {
+    max-width: 365px;
+    width: 100%;
+    margin: auto;
+    align-self: center;
+    padding: 55px 0;
+}
+.login-form-wrap > .eyebrow {
+    font-size: 8px;
+    letter-spacing: 1.3px;
+    color: #7796c0;
+    margin-bottom: 18px;
+}
+.login-form-wrap h2 {
+    font-size: 32px;
+    font-weight: 500;
+    letter-spacing: -1px;
+    margin-bottom: 13px;
+}
+.login-form-wrap > p {
+    font-size: 10px;
+    color: #8193aa;
+    margin-bottom: 35px;
+}
+form label {
+    display: block;
+    font-size: 10px;
+    color: #5d6e82;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+form input,
+form select {
+    display: block;
+    width: 100%;
+    border: 1px solid #dfe6ef;
+    border-radius: 6px;
+    background: #fbfcfe;
+    padding: 12px 13px;
+    font-size: 11px;
+    margin-top: 9px;
+    min-height: 43px;
+}
+form input:focus {
+    border-color: #a7bfe6;
+}
+.password-field {
+    position: relative;
+}
+.password-field input {
+    padding-right: 44px;
+}
+.password-field .icon-button {
+    position: absolute;
+    right: 4px;
+    top: 4px;
+}
+.login-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 8px;
+    color: #8d9eb4;
+    margin: -2px 0 26px;
+}
+.login-meta span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.login-form-wrap .btn {
+    font-size: 11px;
+    min-height: 45px;
+}
+.form-error {
+    padding: 13px 15px;
+    background: #fcf0ee;
+    border: 1px solid #f3dbd5;
+    border-radius: 6px;
+    color: #b96b5b;
+    font-size: 11px;
+    line-height: 1.8;
+    margin: 12px 0;
+}
+.form-or {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    font-size: 8px;
+    color: #91a1b7;
+    margin: 25px 0;
+}
+.form-or > span {
+    height: 1px;
+    background: #e7ecf3;
+    flex: 1;
+}
+.login-demo-note {
+    text-align: center;
+    font-size: 8px;
+    color: #8398b3;
+    margin-top: 13px;
+}
+.login-register {
+    text-align: center;
+    padding-top: 26px;
+    margin-top: 26px;
+    border-top: 1px solid #edf0f5;
+    font-size: 10px;
+    color: #8297b1;
+}
+.login-register button {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+    font-size: 10px;
+    color: var(--blue);
+    background: none;
+    padding: 0 3px;
+}
+.login-form-footer {
+    font-size: 9px;
+    text-align: center;
+    color: #95a8c0;
+    margin-top: 40px;
+}
+.login-copyright {
+    font-size: 8px;
+    text-align: center;
+    color: #94a5bb;
+}
+.registration-info {
+    padding: 23px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: #f8faff;
+}
+.registration-info > svg {
+    color: #7c9dc9;
+    margin-bottom: 16px;
+}
+.registration-info h3 {
+    font-size: 15px;
+    font-weight: 600;
+}
+.registration-info p {
+    font-size: 11px;
+    color: #8a9bb0;
+    margin: 13px 0 23px;
+}
+.registration-info .text-button {
+    display: flex;
+    margin: 20px auto 0;
+}

@@ -1,0 +1,629 @@
+.filters-bar {
+    padding: 20px 22px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.search-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid #e0e7f0;
+    border-radius: 7px;
+    background: #fff;
+    color: #8da4c2;
+    min-width: 0;
+}
+.search-input input {
+    border: 0;
+    outline: none !important;
+    background: transparent;
+    font-size: 10px;
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+}
+.filters-bar > .search-input {
+    flex: 1;
+}
+.search-input:focus-within {
+    border-color: #96b1df;
+    box-shadow: 0 0 0 2px #aac7ee13;
+}
+.search-input .icon-button {
+    padding: 0;
+    min-width: 14px;
+    min-height: 16px;
+}
+.filters-bar select {
+    font-size: 9px;
+}
+.filters-bar .btn {
+    font-size: 9px;
+}
+.filters-bar .pressed {
+    background: #edf3ff;
+    border-color: #aec7ef;
+    color: #4779c9;
+}
+.expanded-filters {
+    display: flex;
+    align-items: flex-end;
+    gap: 18px;
+    padding: 0 22px 22px;
+    border-bottom: 1px solid #ecf0f5;
+    background: #fcfdff;
+}
+.expanded-filters label {
+    font-size: 9px;
+    color: #7890af;
+    flex: 1;
+    max-width: 210px;
+}
+.expanded-filters input,
+.expanded-filters select {
+    display: block;
+    width: 100%;
+    font-size: 10px;
+    border: 1px solid #dfe6ef;
+    border-radius: 6px;
+    background: #fff;
+    padding: 9px 10px;
+    margin-top: 8px;
+}
+.expanded-filters > .text-button {
+    margin-bottom: 12px;
+    font-size: 9px;
+}
+.results-meta {
+    padding: 13px 23px;
+    border-top: 1px solid #edf1f7;
+    display: flex;
+    justify-content: space-between;
+    font-size: 8px;
+    color: #839cbb;
+}
+.results-meta > span:first-child {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 22px;
+    border-top: 1px solid #e8eef5;
+    font-size: 9px;
+    color: #819aba;
+}
+.pagination > div {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+.pagination .icon-button {
+    border: 1px solid #e5ebf3;
+    background: #fff;
+    width: 27px;
+    height: 27px;
+    min-height: 27px;
+    min-width: 27px;
+    padding: 4px;
+}
+.pagination b {
+    font-weight: 400;
+    font:
+        9px 'IBM Plex Mono',
+        monospace;
+    color: #6e89ad;
+}
+.pagination b span {
+    color: #93aac9;
+}
+.info-banner {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 15px 20px;
+    border: 1px solid #dbe7f8;
+    background: #eff5ff;
+    border-radius: 7px;
+    color: #7d9ac6;
+    margin-bottom: 22px;
+}
+.info-banner p {
+    font-size: 10px;
+    color: #6f8db7;
+    line-height: 1.9;
+}
+.info-banner p b {
+    font-weight: 500;
+    color: #637fa9;
+}
+.info-banner.amber {
+    background: #fcf7ee;
+    border-color: #eee3cb;
+    color: #bfa36b;
+}
+.info-banner.amber p {
+    color: #a08a60;
+}
+.info-banner.amber b {
+    color: #9a8051;
+}
+.network-workspace {
+    display: grid;
+    grid-template-columns: 270px minmax(0, 1fr);
+    gap: 21px;
+    align-items: start;
+}
+.case-picker > .search-input {
+    margin: 0 18px 18px;
+}
+.case-picker-list {
+    max-height: 800px;
+    overflow-y: auto;
+}
+.case-picker-list > button {
+    display: block;
+    width: 100%;
+    padding: 18px 20px;
+    background: #fff;
+    border-top: 1px solid #edf1f7;
+    text-align: left;
+    border-left: 3px solid transparent;
+}
+.case-picker-list > button:hover {
+    background: #f8fbff;
+}
+.case-picker-list > button.active {
+    background: #f0f5ff;
+    border-left-color: #5488df;
+}
+.case-picker-list > button > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 9px;
+}
+.case-picker-list b {
+    font:
+        500 9px 'IBM Plex Mono',
+        monospace;
+    color: #6480a7;
+}
+.case-picker-list .mono {
+    font-size: 10px;
+    color: #87a2c7;
+}
+.case-picker-list p {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font:
+        9px 'IBM Plex Mono',
+        monospace;
+    margin: 11px 0 13px;
+    color: #7892b5;
+}
+.case-picker-list small {
+    font-size: 7px;
+    color: #8fa7c7;
+}
+.case-risk-dot {
+    height: 5px;
+    width: 5px;
+    border-radius: 50%;
+    background: #a6c6ba;
+}
+.case-risk-dot.CRITICAL {
+    background: #dc9690;
+}
+.case-risk-dot.HIGH {
+    background: #e2b497;
+}
+.case-risk-dot.MEDIUM {
+    background: #d9c49b;
+}
+.graph-panel .panel-head {
+    border-bottom: 1px solid #edf1f7;
+}
+.graph-stats {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 18px 22px 0;
+    font-size: 9px;
+    color: #819bbd;
+}
+.graph-stats > span:first-child {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.graph-stats i {
+    width: 5px;
+    height: 5px;
+    background: #98b5df;
+    border-radius: 50%;
+}
+.graph-stats > .pill {
+    margin-left: auto;
+}
+.flow-graph {
+    width: 100%;
+    height: auto;
+    min-height: 250px;
+    display: block;
+    overflow: visible;
+}
+.flow-edge {
+    stroke: #95b1db;
+    stroke-width: 1.3;
+    fill: none;
+    stroke-dasharray: 4 4;
+    animation: dashFlow 30s linear infinite;
+}
+.flow-edge.root-edge {
+    stroke: #db9d80;
+}
+.graph-account {
+    cursor: pointer;
+}
+.graph-account > circle {
+    transition:
+        stroke-width 0.2s,
+        fill 0.2s;
+}
+.graph-account:hover > circle,
+.graph-account.is-selected > circle {
+    stroke: #3d7ade;
+    stroke-width: 3;
+}
+.graph-key {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    font-size: 8px;
+    color: #839cbe;
+    padding: 12px 18px 20px;
+}
+.graph-key > span {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+.graph-key i {
+    width: 13px;
+    height: 2px;
+    background: #95b1db;
+}
+.graph-key i.orange {
+    background: #d99c7e;
+}
+.selected-account {
+    display: flex;
+    gap: 13px;
+    align-items: center;
+    padding: 21px 25px;
+    border-block: 1px solid #e7edf5;
+    background: #f9fbff;
+}
+.account-icon {
+    padding: 10px;
+    background: #edf3fd;
+    border: 1px solid #dbe7f8;
+    color: #799ccf;
+    border-radius: 9px;
+    display: inline-flex;
+}
+.selected-account small {
+    font:
+        6px 'IBM Plex Mono',
+        monospace;
+    color: #8da5c7;
+    letter-spacing: 1px;
+}
+.selected-account h3 {
+    font:
+        500 16px 'IBM Plex Mono',
+        monospace;
+    margin-top: 7px;
+    color: #5c7ca6;
+}
+.selected-account p {
+    font-size: 9px;
+    color: #829cbe;
+    margin-top: 7px;
+}
+.selected-account > .pill {
+    margin-left: auto;
+}
+.graph-tip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 23px;
+    color: #8aa4c7;
+    font-size: 9px;
+    border-top: 1px solid #edf1f7;
+    background: #fafcff;
+}
+.chain-list {
+    padding: 0 24px;
+}
+.chain-list > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 17px 0;
+    border-bottom: 1px solid #e9eff7;
+    font-size: 10px;
+    color: #7f99bb;
+}
+.chain-list > div:last-child {
+    border-bottom: 0;
+}
+.chain-list small {
+    display: block;
+    font-size: 8px;
+    color: #91a9c9;
+    margin-top: 6px;
+}
+.chain-list b {
+    font-weight: 500;
+    font-size: 10px;
+    color: #6483aa;
+}
+.subtle-note {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 20px;
+    font-size: 9px;
+    color: #859fbe;
+}
+.ip-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 19px;
+    margin-bottom: 22px;
+}
+.ip-summary-grid > div {
+    background: #fff;
+    border: 1px solid #e3eaf4;
+    border-radius: 8px;
+    padding: 23px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 17px;
+    row-gap: 10px;
+    align-items: center;
+}
+.ip-summary-grid svg {
+    grid-row: span 2;
+    color: #96b1d5;
+    background: #f3f7fe;
+    border: 1px solid #e5ecf7;
+    padding: 10px;
+    border-radius: 10px;
+    width: 45px;
+    height: 45px;
+}
+.ip-summary-grid strong {
+    font:
+        500 29px 'Manrope',
+        sans-serif;
+    color: #52749c;
+    line-height: 1;
+}
+.ip-summary-grid span {
+    font-size: 8px;
+    color: #88a0c0;
+}
+.ip-workspace {
+    display: grid;
+    grid-template-columns: 310px minmax(0, 1fr);
+    gap: 21px;
+    margin-bottom: 22px;
+    align-items: start;
+}
+.ip-search {
+    margin: 0 20px 20px;
+}
+.ip-group-list {
+    max-height: 470px;
+    overflow-y: auto;
+    padding: 0 14px 14px;
+}
+.ip-group-list > button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: 1px solid #e4ebf4;
+    border-radius: 7px;
+    padding: 15px;
+    margin-bottom: 10px;
+    background: #fff;
+}
+.ip-group-list > button.active {
+    border-color: #b7ccec;
+    background: #f3f7ff;
+    box-shadow: 0 3px 8px #527bc60a;
+}
+.ip-group-list > button:hover {
+    border-color: #a6c0e6;
+}
+.ip-group-list > button > div:first-child {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.ip-globe {
+    display: flex;
+    padding: 7px;
+    background: #edf3fd;
+    border-radius: 6px;
+    color: #8ba7d1;
+}
+.ip-group-list b {
+    font-size: 11px;
+    color: #6b89b2;
+    font-weight: 500;
+}
+.ip-group-list > button > div:first-child > svg {
+    margin-left: auto;
+    color: #a2b7d2;
+}
+.ip-group-list p {
+    font-size: 9px;
+    color: #8ca4c3;
+    margin: 12px 0;
+}
+.ip-metrics {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 7px;
+    color: #859ebf;
+}
+.ip-metrics > span:first-child {
+    color: #b88671;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+.ip-metrics i {
+    width: 4px;
+    height: 4px;
+    background: #d0a18b;
+    border-radius: 50%;
+}
+.ip-group-bar {
+    height: 3px;
+    background: #e7eef7;
+    overflow: hidden;
+    border-radius: 3px;
+    margin-top: 12px;
+}
+.ip-group-bar i {
+    display: block;
+    height: 100%;
+    background: #d4a08b;
+    border-radius: 3px;
+}
+.ip-constellation {
+    height: 310px;
+    position: relative;
+    background: radial-gradient(ellipse at center, #edf3ff, #fff 75%);
+    overflow: hidden;
+}
+.ip-constellation > svg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+.ip-constellation line {
+    stroke: #b7cbe8;
+    stroke-dasharray: 4 5;
+    animation: dashFlow 25s linear infinite;
+}
+.ip-constellation circle {
+    fill: #f0f5fd;
+    stroke: #b9cce8;
+    stroke-width: 1;
+}
+.ip-constellation .ip-signal {
+    fill: #91add6;
+    stroke: none;
+    animation: corePulse 4s ease infinite;
+}
+.ip-constellation text {
+    font:
+        8px 'IBM Plex Mono',
+        monospace;
+    fill: #8da6c8;
+}
+.ip-center {
+    position: absolute;
+    left: 50%;
+    top: 46%;
+    translate: -50% -50%;
+    z-index: 2;
+    background: #264872;
+    box-shadow:
+        0 0 0 7px #dce8f7,
+        0 0 0 8px #cbdcf1;
+    width: 125px;
+    height: 100px;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #a5bde0;
+    gap: 8px;
+}
+.ip-center .mono {
+    font-size: 10px;
+    color: #d1dff1;
+}
+.ip-center small {
+    font:
+        5px 'IBM Plex Mono',
+        monospace;
+    letter-spacing: 1px;
+    color: #7a99c3;
+}
+.ip-visual-note {
+    position: absolute;
+    bottom: 12px;
+    width: 100%;
+    text-align: center;
+    font-size: 7px;
+    color: #93aac8;
+}
+.ip-selected-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    border-block: 1px solid #e9eff6;
+    padding: 21px;
+}
+.ip-selected-stats > div {
+    text-align: center;
+    border-right: 1px solid #e8eef7;
+}
+.ip-selected-stats > div:last-child {
+    border: 0;
+}
+.ip-selected-stats strong {
+    display: block;
+    font:
+        500 21px 'Manrope',
+        sans-serif;
+    color: #6484ad;
+}
+.ip-selected-stats span {
+    display: block;
+    font-size: 7px;
+    color: #89a2c3;
+    margin-top: 8px;
+}
+.ip-caution {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 19px 21px;
+    color: #8ca3c1;
+    font-size: 8px;
+}
+.ip-text {
+    font-size: 9px;
+    color: #6e8db7;
+}

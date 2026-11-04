@@ -1,0 +1,10 @@
+@import 'tailwindcss';
+@import './styles/base.css';
+@import './styles/marketing.css';
+@import './styles/auth.css';
+@import './styles/console.css';
+@import './styles/investigation.css';
+@import './styles/developer.css';
+@import './styles/overlays.css';
+@import './styles/motion.css';
+@import './styles/responsive.css';
