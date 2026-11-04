@@ -25,6 +25,11 @@ server:
 
 app:
   cors-allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173}
+  fraud:
+    scan:
+      enabled: ${APP_FRAUD_SCAN_ENABLED:false}
+      fixed-delay-ms: ${APP_FRAUD_SCAN_FIXED_DELAY_MS:30000}
+      batch-size: ${APP_FRAUD_SCAN_BATCH_SIZE:100}
   auth:
     jwt-secret: ${APP_JWT_SECRET:}
     jwt-issuer: ${APP_JWT_ISSUER:scrum-ai}

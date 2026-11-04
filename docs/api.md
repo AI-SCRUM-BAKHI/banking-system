@@ -127,3 +127,10 @@ conservatively prevents money-flow evaluation because it could represent delayed
 posting. Posting updates to already evaluated transfers and late-event replay
 require a separate importer/reconciliation extension; retries cannot change an
 existing transfer. Prior online results remain unchanged after coverage advances.
+
+## Background source evaluation
+
+The optional background scanner evaluates rows in `transactions` and creates fraud
+cases internally. Existing POST endpoints remain available with their current
+service-token authentication and behavior. See [transaction-scan.md](transaction-scan.md)
+for migration, source contracts, coverage, configuration and manual reevaluation.

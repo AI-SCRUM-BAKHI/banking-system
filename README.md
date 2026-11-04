@@ -106,3 +106,10 @@ The API is stateless. Login returns a 15 minute access token and a seven day ref
 | Rule-based fraud detection | `POST /api/v1/transactions/evaluate` | Trusted producer with `X-Service-Token: <APP_SERVICE_TOKEN>` |
 
 See [docs/api.md](docs/api.md) for request and response details. Flyway migration V3 adds the refresh-token table. The migration runs automatically on application startup after the database URL and secrets are configured.
+
+### Background transaction scanner
+
+The optional scanner evaluates source rows in `transactions` and creates fraud cases
+without calling the POST APIs. It is disabled by default. See
+[background transaction evaluation](docs/transaction-scan.md) for V5 rollout,
+coverage requirements, settings and retry/reset procedures.
