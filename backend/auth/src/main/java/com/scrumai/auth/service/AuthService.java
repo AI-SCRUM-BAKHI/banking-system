@@ -117,9 +117,9 @@ public class AuthService {
             .expiresAt(now.plus(ACCESS_LIFETIME))
             .claim("type", "access")
             .build();
-    JwsHeader headers = JwsHeader.with(MacAlgorithm.HS256).build();
+    JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
     String accessToken =
-        jwtEncoder.encode(JwtEncoderParameters.from(headers, claims)).getTokenValue();
+        jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
     byte[] random = new byte[48];
     RANDOM.nextBytes(random);
     String refreshToken = Base64.getUrlEncoder().withoutPadding().encodeToString(random);

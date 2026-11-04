@@ -1,4 +1,4 @@
-CREATE TABLE auth_refresh_tokens (
+CREATE TABLE IF NOT EXISTS auth_refresh_tokens (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     token_hash VARCHAR(64) NOT NULL UNIQUE,
@@ -7,4 +7,4 @@ CREATE TABLE auth_refresh_tokens (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_auth_refresh_tokens_user ON auth_refresh_tokens (user_id);
+CREATE INDEX IF NOT EXISTS idx_auth_refresh_tokens_user ON auth_refresh_tokens (user_id);

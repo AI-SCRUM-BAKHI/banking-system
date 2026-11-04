@@ -38,6 +38,17 @@ The frontend API URL is compiled into the static bundle during image build. To u
 
 Prerequisites: JDK 21.
 
+Configure `backend/.env` with your existing PostgreSQL URI and authentication
+secrets before starting the backend. The local scripts do not start PostgreSQL.
+
+Linux/macOS:
+
+```bash
+bash backend/scripts/run-local.sh
+```
+
+Windows PowerShell:
+
 ```powershell
 Push-Location backend
 .\gradlew.bat :app-bootstrap:bootRun
@@ -79,7 +90,7 @@ Copy `backend/.env.example` to `backend/.env`, then configure these values befor
 
 - `DATABASE_URL`: PostgreSQL JDBC URI used by Spring Boot and Flyway.
 - `APP_JWT_SECRET`: base64 encoded random key with at least 32 bytes. Generate with `openssl rand -base64 32`.
-- `APP_SERVICE_TOKEN`: random secret sent as `X-Service-Token` by the trusted fraud detection producer. Generate one with `openssl rand -hex 32`.
+- `APP_SERVICE_TOKEN`: random secret sent as `X-Service-Token` by the trusted transaction or fraud-result producer. Generate one with `openssl rand -hex 32`.
 - `APP_BOOTSTRAP_ADMIN_*`: configure all four values to create the first administrator when the `users` table is empty. Use a password with at least 12 characters and at most 72 UTF-8 bytes. These values are ignored after a user exists.
 
 The API is stateless. Login returns a 15 minute access token and a seven day refresh token. Refresh tokens are stored only as SHA-256 hashes and rotate when refreshed. Set a new `APP_JWT_SECRET` only when intentionally invalidating all existing access tokens.
@@ -92,5 +103,6 @@ The API is stateless. Login returns a 15 minute access token and a seven day ref
 | User management | `/api/v1/users/**` | `ADMIN`, except `PATCH /api/v1/users/me/password` is available to the signed-in user |
 | Fraud investigation | `/api/v1/fraud-transactions/**` | `ADMIN` and `BANK_USER` |
 | Fraud ingest | `POST /api/v1/fraud-transactions` | Trusted producer with `X-Service-Token: <APP_SERVICE_TOKEN>` |
+| Rule-based fraud detection | `POST /api/v1/transactions/evaluate` | Trusted producer with `X-Service-Token: <APP_SERVICE_TOKEN>` |
 
 See [docs/api.md](docs/api.md) for request and response details. Flyway migration V3 adds the refresh-token table. The migration runs automatically on application startup after the database URL and secrets are configured.
