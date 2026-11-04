@@ -24,6 +24,8 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -73,6 +75,7 @@ public class FraudTransactionEntity {
   private BigDecimal amount;
 
   @Column(nullable = false, length = 3, columnDefinition = "char(3)")
+  @JdbcTypeCode(SqlTypes.CHAR)
   private String currency = "VND";
 
   @Column(name = "transaction_time", nullable = false)

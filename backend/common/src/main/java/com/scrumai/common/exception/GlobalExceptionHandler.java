@@ -4,6 +4,8 @@ import com.scrumai.common.api.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -14,6 +16,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+  private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
   @ExceptionHandler(BusinessException.class)
   public ResponseEntity<ApiErrorResponse> handleBusiness(
@@ -44,6 +47,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiErrorResponse> handleUnexpected(
       Exception exception, HttpServletRequest request) {
+    LOGGER.error("Unhandled exception while processing {}", request.getRequestURI(), exception);
     return response(
         ErrorCode.INTERNAL_SERVER_ERROR, "An unexpected error occurred", request, Map.of());
   }

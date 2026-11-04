@@ -7,7 +7,7 @@ Monorepo for the banking fraud detection product: a Spring Boot backend and a Re
 ```text
 backend/       Java 21 + Spring Boot multi-module backend
 frontend/      React + TypeScript + Vite operations console
-infra/         Local infrastructure, currently PostgreSQL via Docker Compose
+infra/         Docker Compose for the frontend and backend
 .github/       Backend and frontend CI workflows
 docs/          Product and technical documentation (add as needed)
 ```
@@ -18,17 +18,38 @@ The backend keeps persistence entities in their owning Gradle modules:
 - `backend/fraud`: fraud transactions, rule hits, money-flow chain and repositories.
 - `backend/database`: shared JPA setup, datasource URL handling and Flyway migrations.
 
-The backend reads `backend/.env` when launched from that directory. Copy `.env.example` for local PostgreSQL. Database connection settings use one variable: `DATABASE_URL`, a PostgreSQL connection URI containing the username and password.
+The backend reads database and authentication settings from `backend/.env`. Set `DATABASE_URL` to the PostgreSQL connection URI for the existing database; Compose does not start a database container.
+
+## Run frontend and backend with Docker Compose
+
+Configure `backend/.env` with the database URL and required auth secrets, then run from the repository root:
+
+```powershell
+docker compose -f infra/docker-compose.yml up --build
+```
+
+Open the frontend at http://localhost:5173. The backend API is at http://localhost:8080 and Swagger is at http://localhost:8080/swagger-ui.html. Stop both containers with `Ctrl+C`, or run `docker compose -f infra/docker-compose.yml down` in another terminal.
+
+The frontend API URL is compiled into the static bundle during image build. To use a different API host, set `VITE_API_BASE_URL` in the shell before running Compose and rebuild the image.
 
 ## Run locally
 
 ### Backend
 
-Prerequisites: JDK 21 and Docker Desktop.
+Prerequisites: JDK 21.
+
+Configure `backend/.env` with your existing PostgreSQL URI and authentication
+secrets before starting the backend. The local scripts do not start PostgreSQL.
+
+Linux/macOS:
+
+```bash
+bash backend/scripts/run-local.sh
+```
+
+Windows PowerShell:
 
 ```powershell
-Copy-Item backend/.env.example backend/.env
-docker compose -f infra/docker-compose.yml up -d postgres
 Push-Location backend
 .\gradlew.bat :app-bootstrap:bootRun
 Pop-Location
@@ -69,7 +90,7 @@ Copy `backend/.env.example` to `backend/.env`, then configure these values befor
 
 - `DATABASE_URL`: PostgreSQL JDBC URI used by Spring Boot and Flyway.
 - `APP_JWT_SECRET`: base64 encoded random key with at least 32 bytes. Generate with `openssl rand -base64 32`.
-- `APP_SERVICE_TOKEN`: random secret sent as `X-Service-Token` by the trusted fraud detection producer. Generate one with `openssl rand -hex 32`.
+- `APP_SERVICE_TOKEN`: random secret sent as `X-Service-Token` by the trusted transaction or fraud-result producer. Generate one with `openssl rand -hex 32`.
 - `APP_BOOTSTRAP_ADMIN_*`: configure all four values to create the first administrator when the `users` table is empty. Use a password with at least 12 characters and at most 72 UTF-8 bytes. These values are ignored after a user exists.
 
 The API is stateless. Login returns a 15 minute access token and a seven day refresh token. Refresh tokens are stored only as SHA-256 hashes and rotate when refreshed. Set a new `APP_JWT_SECRET` only when intentionally invalidating all existing access tokens.
@@ -82,5 +103,6 @@ The API is stateless. Login returns a 15 minute access token and a seven day ref
 | User management | `/api/v1/users/**` | `ADMIN`, except `PATCH /api/v1/users/me/password` is available to the signed-in user |
 | Fraud investigation | `/api/v1/fraud-transactions/**` | `ADMIN` and `BANK_USER` |
 | Fraud ingest | `POST /api/v1/fraud-transactions` | Trusted producer with `X-Service-Token: <APP_SERVICE_TOKEN>` |
+| Rule-based fraud detection | `POST /api/v1/transactions/evaluate` | Trusted producer with `X-Service-Token: <APP_SERVICE_TOKEN>` |
 
 See [docs/api.md](docs/api.md) for request and response details. Flyway migration V3 adds the refresh-token table. The migration runs automatically on application startup after the database URL and secrets are configured.
