@@ -125,7 +125,9 @@ public class SecurityConfig {
                         "/swagger-ui.html")
                     .permitAll()
                     .requestMatchers(
-                        org.springframework.http.HttpMethod.POST, "/api/v1/fraud-transactions")
+                        org.springframework.http.HttpMethod.POST,
+                        "/api/v1/fraud-transactions",
+                        "/api/v1/transactions/evaluate")
                     .hasRole("SERVICE")
                     .requestMatchers("/api/v1/users/me/password")
                     .hasAnyRole("ADMIN", "BANK_USER")
