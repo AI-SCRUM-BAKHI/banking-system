@@ -15,8 +15,8 @@ export const apiClient = axios.create({
 
 apiClient.interceptors.request.use((config) => {
     const tokens = getTokens()
-        if (tokens && !['/auth/login', '/auth/refresh', '/auth/register'].includes(config.url || ''))
-            config.headers.Authorization = `Bearer ${tokens.accessToken}`
+    if (tokens && !['/auth/login', '/auth/refresh', '/auth/register'].includes(config.url || ''))
+        config.headers.Authorization = `Bearer ${tokens.accessToken}`
     return config
 })
 

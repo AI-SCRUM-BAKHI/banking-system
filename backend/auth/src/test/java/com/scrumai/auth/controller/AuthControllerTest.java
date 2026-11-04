@@ -11,7 +11,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.scrumai.auth.dto.CurrentUserResponse;
 import com.scrumai.auth.dto.LoginRequest;
-import com.scrumai.auth.dto.RefreshRequest;
 import com.scrumai.auth.dto.RegisterRequest;
 import com.scrumai.auth.dto.TokenResponse;
 import com.scrumai.auth.service.AuthService;
@@ -189,7 +188,8 @@ class AuthControllerTest {
   }
 
   @Test
-  @DisplayName("POST /api/v1/auth/logout - should allow unauthenticated logout when access token expired")
+  @DisplayName(
+      "POST /api/v1/auth/logout - should allow unauthenticated logout when access token expired")
   void logout_withoutPrincipal() throws Exception {
     mockMvc
         .perform(
@@ -214,7 +214,12 @@ class AuthControllerTest {
     UUID userId = UUID.randomUUID();
     CurrentUserResponse profile =
         new CurrentUserResponse(
-            userId, "admin", "Admin User", "admin@bankshield.com", UserRole.ADMIN, UserStatus.ACTIVE);
+            userId,
+            "admin",
+            "Admin User",
+            "admin@bankshield.com",
+            UserRole.ADMIN,
+            UserStatus.ACTIVE);
     when(authService.me(userId)).thenReturn(profile);
 
     Authentication auth = new UsernamePasswordAuthenticationToken(userId.toString(), null);

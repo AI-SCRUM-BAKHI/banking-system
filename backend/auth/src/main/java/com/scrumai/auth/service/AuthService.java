@@ -82,8 +82,7 @@ public class AuthService {
     try {
       users.saveAndFlush(user);
     } catch (DataIntegrityViolationException exception) {
-      throw new BusinessException(
-          ErrorCode.RESOURCE_CONFLICT, "Username or email already exists");
+      throw new BusinessException(ErrorCode.RESOURCE_CONFLICT, "Username or email already exists");
     }
     return issueTokens(user);
   }
