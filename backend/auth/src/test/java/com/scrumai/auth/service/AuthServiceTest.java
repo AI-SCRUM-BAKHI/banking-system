@@ -117,8 +117,7 @@ class AuthServiceTest {
       when(users.existsByEmailIgnoreCase("exist@example.com")).thenReturn(true);
 
       RegisterRequest request =
-          new RegisterRequest(
-              "new_user", "Password123!@#", "Existing Email", "exist@example.com");
+          new RegisterRequest("new_user", "Password123!@#", "Existing Email", "exist@example.com");
 
       assertThatThrownBy(() -> authService.register(request))
           .isInstanceOf(BusinessException.class)
