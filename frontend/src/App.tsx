@@ -92,7 +92,7 @@ function Application() {
                 <Route
                     path="/login"
                     element={
-                        session ? (
+                        session?.mode === 'live' ? (
                             <Navigate to="/console" replace />
                         ) : (
                             <LoginPage onDemo={() => start('demo', demoUser)} onLogin={(user) => start('live', user)} />
