@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
@@ -115,7 +117,9 @@ public class AuthService {
             .expiresAt(now.plus(ACCESS_LIFETIME))
             .claim("type", "access")
             .build();
-    String accessToken = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+    JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
+    String accessToken =
+        jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
     byte[] random = new byte[48];
     RANDOM.nextBytes(random);
     String refreshToken = Base64.getUrlEncoder().withoutPadding().encodeToString(random);
