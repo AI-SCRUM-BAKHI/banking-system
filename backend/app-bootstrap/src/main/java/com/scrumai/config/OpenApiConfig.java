@@ -44,7 +44,12 @@ public class OpenApiConfig {
   @Bean
   OpenApiCustomizer operationAuthentication() {
     Set<String> publicPaths =
-        Set.of("/api/v1/auth/login", "/api/v1/auth/refresh", "/api/v1/system/ping");
+        Set.of(
+            "/api/v1/auth/login",
+            "/api/v1/auth/register",
+            "/api/v1/auth/refresh",
+            "/api/v1/auth/logout",
+            "/api/v1/system/ping");
     Set<String> servicePaths =
         Set.of("/api/v1/fraud-transactions", "/api/v1/transactions/evaluate");
     return api -> {

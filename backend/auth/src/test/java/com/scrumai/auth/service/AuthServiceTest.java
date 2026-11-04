@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.scrumai.auth.dto.CurrentUserResponse;
 import com.scrumai.auth.dto.LoginRequest;
+import com.scrumai.auth.dto.RegisterRequest;
 import com.scrumai.auth.dto.TokenResponse;
 import com.scrumai.auth.entity.RefreshTokenEntity;
 import com.scrumai.auth.repository.RefreshTokenRepository;
@@ -72,6 +73,78 @@ class AuthServiceTest {
   }
 
   @Nested
+  @DisplayName("Register Tests")
+  class RegisterTests {
+
+    @Test
+    @DisplayName("Should successfully register when input is valid and user is saved")
+    void register_success() {
+      when(users.existsByUsername("new_user")).thenReturn(false);
+      when(users.existsByEmailIgnoreCase("new_user@example.com")).thenReturn(false);
+      when(passwordEncoder.encode("Password123!@#")).thenReturn("$2a$10$encodedPassword");
+      mockJwtEncoding();
+
+      RegisterRequest request =
+          new RegisterRequest(
+              "new_user", "Password123!@#", "New User", "new_user@example.com");
+      TokenResponse response = authService.register(request);
+
+      assertThat(response).isNotNull();
+      assertThat(response.accessToken()).isEqualTo("mock-access-token");
+      verify(users).saveAndFlush(any(UserEntity.class));
+    }
+
+    @Test
+    @DisplayName("Should throw RESOURCE_CONFLICT when username already exists")
+    void register_usernameExists() {
+      when(users.existsByUsername("existing_user")).thenReturn(true);
+
+      RegisterRequest request =
+          new RegisterRequest(
+              "existing_user", "Password123!@#", "Existing User", "exist@example.com");
+
+      assertThatThrownBy(() -> authService.register(request))
+          .isInstanceOf(BusinessException.class)
+          .satisfies(
+              ex ->
+                  assertThat(((BusinessException) ex).errorCode())
+                      .isEqualTo(ErrorCode.RESOURCE_CONFLICT));
+    }
+
+    @Test
+    @DisplayName("Should throw RESOURCE_CONFLICT when email already exists")
+    void register_emailExists() {
+      when(users.existsByUsername("new_user")).thenReturn(false);
+      when(users.existsByEmailIgnoreCase("exist@example.com")).thenReturn(true);
+
+      RegisterRequest request =
+          new RegisterRequest(
+              "new_user", "Password123!@#", "Existing Email", "exist@example.com");
+
+      assertThatThrownBy(() -> authService.register(request))
+          .isInstanceOf(BusinessException.class)
+          .satisfies(
+              ex ->
+                  assertThat(((BusinessException) ex).errorCode())
+                      .isEqualTo(ErrorCode.RESOURCE_CONFLICT));
+    }
+
+    @Test
+    @DisplayName("Should throw INVALID_REQUEST when password is less than 12 characters")
+    void register_passwordTooShort() {
+      RegisterRequest request =
+          new RegisterRequest("new_user", "short", "Short Pass", "short@example.com");
+
+      assertThatThrownBy(() -> authService.register(request))
+          .isInstanceOf(BusinessException.class)
+          .satisfies(
+              ex ->
+                  assertThat(((BusinessException) ex).errorCode())
+                      .isEqualTo(ErrorCode.INVALID_REQUEST));
+    }
+  }
+
+  @Nested
   @DisplayName("Login Tests")
   class LoginTests {
 
@@ -110,9 +183,7 @@ class AuthServiceTest {
       assertThatThrownBy(() -> authService.login(new LoginRequest("unknown", "password")))
           .isInstanceOf(BusinessException.class)
           .satisfies(
-              ex ->
-                  assertThat(((BusinessException) ex).errorCode())
-                      .isEqualTo(ErrorCode.UNAUTHORIZED));
+              ex -> assertThat(((BusinessException) ex).errorCode()).isEqualTo(ErrorCode.UNAUTHORIZED));
     }
 
     @Test
@@ -125,9 +196,7 @@ class AuthServiceTest {
       assertThatThrownBy(() -> authService.login(new LoginRequest("john_doe", "wrongpass")))
           .isInstanceOf(BusinessException.class)
           .satisfies(
-              ex ->
-                  assertThat(((BusinessException) ex).errorCode())
-                      .isEqualTo(ErrorCode.UNAUTHORIZED));
+              ex -> assertThat(((BusinessException) ex).errorCode()).isEqualTo(ErrorCode.UNAUTHORIZED));
     }
 
     @Test
@@ -139,9 +208,7 @@ class AuthServiceTest {
       assertThatThrownBy(() -> authService.login(new LoginRequest("john_doe", "password123")))
           .isInstanceOf(BusinessException.class)
           .satisfies(
-              ex ->
-                  assertThat(((BusinessException) ex).errorCode())
-                      .isEqualTo(ErrorCode.UNAUTHORIZED));
+              ex -> assertThat(((BusinessException) ex).errorCode()).isEqualTo(ErrorCode.UNAUTHORIZED));
     }
   }
 
@@ -177,9 +244,7 @@ class AuthServiceTest {
       assertThatThrownBy(() -> authService.refresh("non-existent-token"))
           .isInstanceOf(BusinessException.class)
           .satisfies(
-              ex ->
-                  assertThat(((BusinessException) ex).errorCode())
-                      .isEqualTo(ErrorCode.UNAUTHORIZED));
+              ex -> assertThat(((BusinessException) ex).errorCode()).isEqualTo(ErrorCode.UNAUTHORIZED));
     }
 
     @Test
@@ -193,9 +258,7 @@ class AuthServiceTest {
       assertThatThrownBy(() -> authService.refresh("revoked-token"))
           .isInstanceOf(BusinessException.class)
           .satisfies(
-              ex ->
-                  assertThat(((BusinessException) ex).errorCode())
-                      .isEqualTo(ErrorCode.UNAUTHORIZED));
+              ex -> assertThat(((BusinessException) ex).errorCode()).isEqualTo(ErrorCode.UNAUTHORIZED));
     }
 
     @Test
@@ -210,9 +273,7 @@ class AuthServiceTest {
       assertThatThrownBy(() -> authService.refresh("expired-token"))
           .isInstanceOf(BusinessException.class)
           .satisfies(
-              ex ->
-                  assertThat(((BusinessException) ex).errorCode())
-                      .isEqualTo(ErrorCode.UNAUTHORIZED));
+              ex -> assertThat(((BusinessException) ex).errorCode()).isEqualTo(ErrorCode.UNAUTHORIZED));
     }
 
     @Test
@@ -229,9 +290,7 @@ class AuthServiceTest {
       assertThatThrownBy(() -> authService.refresh("valid-token"))
           .isInstanceOf(BusinessException.class)
           .satisfies(
-              ex ->
-                  assertThat(((BusinessException) ex).errorCode())
-                      .isEqualTo(ErrorCode.UNAUTHORIZED));
+              ex -> assertThat(((BusinessException) ex).errorCode()).isEqualTo(ErrorCode.UNAUTHORIZED));
     }
   }
 
@@ -256,8 +315,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName(
-        "Should revoke token when user id is null (unauthenticated / expired access token)")
+    @DisplayName("Should revoke token when user id is null (unauthenticated / expired access token)")
     void logout_nullUserIdAllowed() {
       UUID userId = UUID.randomUUID();
       UserEntity user = createUser(userId, "john_doe", UserStatus.ACTIVE);
@@ -328,9 +386,7 @@ class AuthServiceTest {
       assertThatThrownBy(() -> authService.me(userId))
           .isInstanceOf(BusinessException.class)
           .satisfies(
-              ex ->
-                  assertThat(((BusinessException) ex).errorCode())
-                      .isEqualTo(ErrorCode.UNAUTHORIZED));
+              ex -> assertThat(((BusinessException) ex).errorCode()).isEqualTo(ErrorCode.UNAUTHORIZED));
     }
 
     @Test
@@ -343,9 +399,7 @@ class AuthServiceTest {
       assertThatThrownBy(() -> authService.me(userId))
           .isInstanceOf(BusinessException.class)
           .satisfies(
-              ex ->
-                  assertThat(((BusinessException) ex).errorCode())
-                      .isEqualTo(ErrorCode.UNAUTHORIZED));
+              ex -> assertThat(((BusinessException) ex).errorCode()).isEqualTo(ErrorCode.UNAUTHORIZED));
     }
   }
 }

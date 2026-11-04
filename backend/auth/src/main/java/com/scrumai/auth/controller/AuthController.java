@@ -3,6 +3,7 @@ package com.scrumai.auth.controller;
 import com.scrumai.auth.dto.CurrentUserResponse;
 import com.scrumai.auth.dto.LoginRequest;
 import com.scrumai.auth.dto.RefreshRequest;
+import com.scrumai.auth.dto.RegisterRequest;
 import com.scrumai.auth.dto.TokenResponse;
 import com.scrumai.auth.service.AuthService;
 import com.scrumai.common.api.ApiResponse;
@@ -23,6 +24,11 @@ public class AuthController {
 
   public AuthController(AuthService auth) {
     this.auth = auth;
+  }
+
+  @PostMapping("/register")
+  public ApiResponse<TokenResponse> register(@Valid @RequestBody RegisterRequest request) {
+    return ApiResponse.success(auth.register(request), "User registered successfully");
   }
 
   @PostMapping("/login")

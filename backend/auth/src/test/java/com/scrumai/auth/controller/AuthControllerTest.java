@@ -11,6 +11,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.scrumai.auth.dto.CurrentUserResponse;
 import com.scrumai.auth.dto.LoginRequest;
+import com.scrumai.auth.dto.RefreshRequest;
+import com.scrumai.auth.dto.RegisterRequest;
 import com.scrumai.auth.dto.TokenResponse;
 import com.scrumai.auth.service.AuthService;
 import com.scrumai.common.exception.GlobalExceptionHandler;
@@ -45,6 +47,53 @@ class AuthControllerTest {
         MockMvcBuilders.standaloneSetup(authController)
             .setControllerAdvice(new GlobalExceptionHandler())
             .build();
+  }
+
+  @Test
+  @DisplayName("POST /api/v1/auth/register - should return token response on valid registration")
+  void register_success() throws Exception {
+    TokenResponse tokenResponse =
+        new TokenResponse("mock-jwt-token", "mock-refresh-token", "Bearer", 900L);
+    when(authService.register(any(RegisterRequest.class))).thenReturn(tokenResponse);
+
+    mockMvc
+        .perform(
+            post("/api/v1/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "username": "newuser",
+                      "password": "Password123!@#",
+                      "fullName": "New User",
+                      "email": "newuser@example.com"
+                    }
+                    """))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.success").value(true))
+        .andExpect(jsonPath("$.data.accessToken").value("mock-jwt-token"))
+        .andExpect(jsonPath("$.data.refreshToken").value("mock-refresh-token"));
+  }
+
+  @Test
+  @DisplayName("POST /api/v1/auth/register - should return 400 when missing required fields")
+  void register_validationFailure() throws Exception {
+    mockMvc
+        .perform(
+            post("/api/v1/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "username": "",
+                      "password": "short",
+                      "fullName": "",
+                      "email": "invalid-email"
+                    }
+                    """))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
   }
 
   @Test
@@ -140,8 +189,7 @@ class AuthControllerTest {
   }
 
   @Test
-  @DisplayName(
-      "POST /api/v1/auth/logout - should allow unauthenticated logout when access token expired")
+  @DisplayName("POST /api/v1/auth/logout - should allow unauthenticated logout when access token expired")
   void logout_withoutPrincipal() throws Exception {
     mockMvc
         .perform(
@@ -166,12 +214,7 @@ class AuthControllerTest {
     UUID userId = UUID.randomUUID();
     CurrentUserResponse profile =
         new CurrentUserResponse(
-            userId,
-            "admin",
-            "Admin User",
-            "admin@bankshield.com",
-            UserRole.ADMIN,
-            UserStatus.ACTIVE);
+            userId, "admin", "Admin User", "admin@bankshield.com", UserRole.ADMIN, UserStatus.ACTIVE);
     when(authService.me(userId)).thenReturn(profile);
 
     Authentication auth = new UsernamePasswordAuthenticationToken(userId.toString(), null);

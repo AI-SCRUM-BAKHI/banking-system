@@ -15,8 +15,8 @@ export const apiClient = axios.create({
 
 apiClient.interceptors.request.use((config) => {
     const tokens = getTokens()
-    if (tokens && !['/auth/login', '/auth/refresh'].includes(config.url || ''))
-        config.headers.Authorization = `Bearer ${tokens.accessToken}`
+        if (tokens && !['/auth/login', '/auth/refresh', '/auth/register'].includes(config.url || ''))
+            config.headers.Authorization = `Bearer ${tokens.accessToken}`
     return config
 })
 
@@ -31,7 +31,7 @@ apiClient.interceptors.response.use(
             !config ||
             config._retried ||
             !tokens ||
-            ['/auth/login', '/auth/refresh', '/auth/logout'].includes(config.url || '')
+            ['/auth/login', '/auth/refresh', '/auth/logout', '/auth/register'].includes(config.url || '')
         )
             return Promise.reject(error)
         config._retried = true
