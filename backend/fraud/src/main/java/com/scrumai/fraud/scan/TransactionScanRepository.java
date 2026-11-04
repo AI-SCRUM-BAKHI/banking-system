@@ -1,6 +1,7 @@
 package com.scrumai.fraud.scan;
 
 import com.scrumai.fraud.dto.FraudRequests.RuleHit;
+import com.scrumai.fraud.repository.RiskEvaluationRepository;
 import com.scrumai.fraud.service.RiskModels.Context;
 import com.scrumai.fraud.service.RiskModels.Coverage;
 import com.scrumai.fraud.service.RiskModels.Evaluation;
@@ -20,10 +21,13 @@ import tools.jackson.databind.ObjectMapper;
 public class TransactionScanRepository {
   private final JdbcTemplate jdbc;
   private final ObjectMapper mapper;
+  private final RiskEvaluationRepository evaluations;
 
-  public TransactionScanRepository(JdbcTemplate jdbc, ObjectMapper mapper) {
+  public TransactionScanRepository(
+      JdbcTemplate jdbc, ObjectMapper mapper, RiskEvaluationRepository evaluations) {
     this.jdbc = jdbc;
     this.mapper = mapper;
+    this.evaluations = evaluations;
   }
 
   public List<String> candidates(int limit) {
@@ -125,16 +129,11 @@ public class TransactionScanRepository {
       String reason,
       String audit) {
     var result = evaluation.result();
-    jdbc.update(
-        """
-        INSERT INTO transaction_evaluations
-          (transaction_ref, evaluated_at, rule_version, request_snapshot, result, audit)
-        VALUES (?, ?, ?, CAST(? AS jsonb), CAST(? AS jsonb), CAST(? AS jsonb))
-        """,
-        tx.transactionRef(),
-        Timestamp.from(now),
-        result.ruleVersion(),
-        mapper.writeValueAsString(tx),
+    evaluations.save(
+        tx.transfer(),
+        evaluations.lock(),
+        now,
+        mapper.writeValueAsString(tx.transfer()),
         mapper.writeValueAsString(result),
         audit);
     jdbc.update(

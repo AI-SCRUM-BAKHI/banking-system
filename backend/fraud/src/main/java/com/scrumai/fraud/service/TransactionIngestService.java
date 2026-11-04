@@ -36,8 +36,9 @@ public class TransactionIngestService {
         INSERT INTO transactions
           (transaction_ref, from_account_ref, from_account_masked, from_customer_name,
            to_account_ref, to_account_masked, to_customer_name, amount, currency,
-           transaction_time, posted_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+           transaction_time, posted_at, customer_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+          (SELECT customer_id FROM account_customer_mapping WHERE account_id = ?))
         ON CONFLICT (transaction_ref) DO NOTHING
         RETURNING transaction_ref, processing_status, created_at
         """,
@@ -56,7 +57,8 @@ public class TransactionIngestService {
             tx.amount(),
             tx.currency(),
             Timestamp.from(tx.transactionTime()),
-            tx.postedAt() == null ? null : Timestamp.from(tx.postedAt()));
+            tx.postedAt() == null ? null : Timestamp.from(tx.postedAt()),
+            tx.fromAccountRef());
     if (inserted.isEmpty()) {
       throw new BusinessException(
           ErrorCode.RESOURCE_CONFLICT, "Transaction reference already exists");

@@ -43,7 +43,7 @@ public class RiskEvaluationRepository {
   public Optional<Saved> find(String ref) {
     return jdbc
         .query(
-            "SELECT request_json, result_json FROM risk_transfer_history WHERE transaction_ref = ?",
+            "SELECT request_json, result_json FROM risk_transfer_history WHERE transaction_ref = ? ORDER BY ingest_order DESC LIMIT 1",
             (rs, row) -> new Saved(rs.getString("request_json"), rs.getString("result_json")),
             ref)
         .stream()
@@ -70,9 +70,13 @@ public class RiskEvaluationRepository {
     List<Transfer> outbound =
         jdbc.query(
             """
-        SELECT * FROM risk_transfer_history
-        WHERE sender_account_id = ? AND transaction_time >= ? AND transaction_time <= ?
-        ORDER BY ingest_order
+        SELECT * FROM (
+          SELECT h.*,
+            row_number() OVER (PARTITION BY transaction_ref ORDER BY ingest_order DESC) AS evaluation_rank,
+            min(ingest_order) OVER (PARTITION BY transaction_ref) AS first_ingest_order
+          FROM risk_transfer_history h
+          WHERE sender_account_id = ? AND transaction_time >= ? AND transaction_time <= ?
+        ) history WHERE evaluation_rank = 1 ORDER BY first_ingest_order
         """,
             (rs, row) -> transfer(rs),
             account,
@@ -82,9 +86,13 @@ public class RiskEvaluationRepository {
     List<Transfer> inbound =
         jdbc.query(
             """
-        SELECT * FROM risk_transfer_history
-        WHERE receiver_account_id = ? AND posted_at >= ? AND posted_at < ?
-        ORDER BY ingest_order
+        SELECT * FROM (
+          SELECT h.*,
+            row_number() OVER (PARTITION BY transaction_ref ORDER BY ingest_order DESC) AS evaluation_rank,
+            min(ingest_order) OVER (PARTITION BY transaction_ref) AS first_ingest_order
+          FROM risk_transfer_history h
+          WHERE receiver_account_id = ? AND posted_at >= ? AND posted_at < ?
+        ) history WHERE evaluation_rank = 1 ORDER BY first_ingest_order
         """,
             (rs, row) -> transfer(rs),
             account,
@@ -138,10 +146,14 @@ public class RiskEvaluationRepository {
         requestJson,
         resultJson,
         auditJson);
+    Instant watermark =
+        state.watermark() == null || tx.transactionTime().isAfter(state.watermark())
+            ? tx.transactionTime()
+            : state.watermark();
     jdbc.update(
         "UPDATE risk_ingest_state SET last_transaction_time = ?, last_transaction_time_exact = ?, last_ingest_order = ? WHERE id = 1",
-        Timestamp.from(tx.transactionTime()),
-        tx.transactionTime().toString(),
+        Timestamp.from(watermark),
+        watermark.toString(),
         order);
   }
 

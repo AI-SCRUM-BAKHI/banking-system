@@ -1,18 +1,29 @@
 # Background transaction evaluation
 
+For importing the three dataset CSVs, see the
+[Neon admin import guide](../backend/scripts/neon-import/README.vi.md).
+
 The scanner reads successful transfers from PostgreSQL `transactions`, evaluates the
-existing rule engine, appends `transaction_evaluations`, and creates a
+existing rule engine, appends `risk_transfer_history`, and creates a
 `fraud_transactions` case only when `isFraud = true` (current threshold: 60).
 All writes for one transfer commit or roll back together. Existing cases and their
 review status are preserved. The two legacy POST APIs retain their existing behavior
-and separate `risk_transfer_history` context.
+and their sequential context behavior. Both paths use the same evaluation ledger;
+reevaluations append entries and context queries deduplicate by transaction reference.
+
+V8/V9 consolidate raw CSV and labels into `transactions.source_data` and
+`transactions.source_label`, and backfill `transactions.customer_id`. The redundant
+tables `transaction_source_data`, `transaction_source_labels`, and
+`transaction_evaluations` are removed only after migration verifies their content
+has been copied. Existing history, fraud cases and review status are preserved.
 
 ## Rollout and configuration
 
-1. Back up the database and deploy V5 through the existing Flyway startup mechanism.
-   V1–V4 are unchanged. V5 supports a new database and adoption of a source table
+1. Back up the database and deploy V1–V9 through the existing Flyway startup mechanism.
+   Existing migrations are unchanged. V5 supports a new database and adoption of a source table
    created with the original documented `transactions` schema; incompatible preexisting
-   schemas must be reconciled before deployment. Do not manually execute V5 before Flyway.
+   schemas must be reconciled before deployment. Roll out the new scanner code with
+   V9; the old scanner writes a table removed by V9. Do not execute SQL outside Flyway.
 2. Keep `APP_FRAUD_SCAN_ENABLED=false` (default) while loading and verifying source data.
 3. Verify coverage using the trusted importer/operator workflow for
    `risk_account_coverage`. Never certify an interval with missing source transfers.
@@ -126,10 +137,10 @@ FROM transactions GROUP BY processing_status, evaluation_decision;
 SELECT transaction_ref, attempt_count, next_attempt_at, last_error
 FROM transactions WHERE processing_status IN ('RETRY', 'FAILED');
 
-SELECT transaction_ref, evaluated_at, rule_version, result, audit
-FROM transaction_evaluations
+SELECT transaction_ref, evaluated_at, result_json, audit_json
+FROM risk_transfer_history
 WHERE transaction_ref = 'REPLACE_WITH_TRANSACTION_REF'
-ORDER BY evaluated_at DESC;
+ORDER BY ingest_order DESC;
 ```
 
 ## Verification

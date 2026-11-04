@@ -73,11 +73,18 @@ public class IpIntelligenceService {
     return summarize(
         jdbc.query(
             """
+            WITH latest AS (
+              SELECT DISTINCT ON (transaction_ref) * FROM risk_transfer_history
+              ORDER BY transaction_ref, ingest_order DESC
+            )
             SELECT h.sender_account_id, h.receiver_account_id, h.amount_vnd,
-              h.audit_json::jsonb #>> '{sourceTransaction,ip_address}' AS source_ip,
-              h.audit_json::jsonb #>> '{sourceScenarioLabel,is_fraud}' AS source_label,
+              COALESCE(host(t.ip_address), NULLIF(t.source_data->>'ip_address', ''),
+                h.audit_json::jsonb #>> '{sourceTransaction,ip_address}') AS source_ip,
+              COALESCE(t.source_label->>'is_fraud',
+                h.audit_json::jsonb #>> '{sourceScenarioLabel,is_fraud}') AS source_label,
               h.result_json::jsonb ->> 'decision' AS engine_decision, f.*
-            FROM risk_transfer_history h
+            FROM latest h
+            LEFT JOIN transactions t ON t.transaction_ref = h.transaction_ref
             LEFT JOIN fraud_transactions f ON f.transaction_ref = h.transaction_ref
             ORDER BY h.ingest_order
             """,

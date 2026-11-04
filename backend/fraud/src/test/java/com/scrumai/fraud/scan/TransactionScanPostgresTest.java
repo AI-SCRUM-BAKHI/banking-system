@@ -11,7 +11,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.scrumai.common.exception.GlobalExceptionHandler;
 import com.scrumai.fraud.controller.TransactionController;
+import com.scrumai.fraud.dto.EvaluationRequest;
+import com.scrumai.fraud.repository.RiskEvaluationRepository;
+import com.scrumai.fraud.service.IpIntelligenceService;
 import com.scrumai.fraud.service.RiskScoreEngine;
+import com.scrumai.fraud.service.TransactionEvaluationService;
 import com.scrumai.fraud.service.TransactionIngestService;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -63,11 +67,19 @@ class TransactionScanPostgresTest {
             "V2__create_identity_and_fraud_schema.sql",
             "V3__create_auth_refresh_tokens.sql",
             "V4__create_risk_evaluation_context.sql",
-            "V5__create_transaction_scan.sql")) {
+            "V5__create_transaction_scan.sql",
+            "V6__create_dataset_import_tables.sql",
+            "V7__create_customers.sql",
+            "V8__consolidate_transaction_data.sql",
+            "V9__remove_redundant_transaction_tables.sql")) {
       jdbc.execute(
           new ClassPathResource("db/migration/" + file).getContentAsString(StandardCharsets.UTF_8));
     }
-    repository = spy(new TransactionScanRepository(jdbc, JsonMapper.builder().build()));
+    var mapper = JsonMapper.builder().build();
+    repository =
+        spy(
+            new TransactionScanRepository(
+                jdbc, mapper, new RiskEvaluationRepository(jdbc, mapper)));
     processor =
         new TransactionScanProcessor(
             repository,
@@ -92,9 +104,12 @@ class TransactionScanPostgresTest {
     assertThat(processor.process("normal")).isEqualTo("COMPLETED");
     assertThat(value("normal", "evaluation_decision")).isEqualTo("INSUFFICIENT_DATA");
     assertThat(value("normal", "evaluation_status")).isEqualTo("PARTIAL");
-    assertThat(count("transaction_evaluations")).isEqualTo(1);
+    assertThat(count("risk_transfer_history")).isEqualTo(1);
     assertThat(count("fraud_transactions")).isZero();
-    assertThat(count("risk_transfer_history")).isZero();
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT last_transaction_time_exact FROM risk_ingest_state", String.class))
+        .isEqualTo(T.plusSeconds(100).toString());
     assertThat(processor.process("normal")).isEqualTo("SKIPPED");
   }
 
@@ -110,7 +125,7 @@ class TransactionScanPostgresTest {
     jdbc.update(
         "UPDATE transactions SET processing_status = 'PENDING' WHERE transaction_ref = 'suspect'");
     assertThat(processor.process("suspect")).isEqualTo("COMPLETED");
-    assertThat(count("transaction_evaluations")).isEqualTo(2);
+    assertThat(count("risk_transfer_history")).isEqualTo(2);
     assertThat(count("fraud_transactions")).isEqualTo(1);
     assertThat(jdbc.queryForObject("SELECT review_status FROM fraud_transactions", String.class))
         .isEqualTo("CONFIRMED_FRAUD");
@@ -150,7 +165,7 @@ class TransactionScanPostgresTest {
         jdbc.update(
             "UPDATE transactions SET next_attempt_at = now() - interval '1 second' WHERE transaction_ref='suspect'");
       }
-      assertThat(count("transaction_evaluations")).isZero();
+      assertThat(count("risk_transfer_history")).isZero();
       assertThat(count("fraud_transactions")).isZero();
       assertThat(count("fraud_rule_hits")).isZero();
       assertThat(count("transaction_chain")).isZero();
@@ -258,7 +273,6 @@ class TransactionScanPostgresTest {
 
   @Test
   void adoptsPreviouslyCreatedSourceTableWithoutLosingRows() throws Exception {
-    jdbc.execute("DROP TABLE transaction_evaluations");
     jdbc.execute("DROP TABLE transactions");
     jdbc.execute("DROP FUNCTION protect_transaction_source()");
     String migration =
@@ -291,7 +305,7 @@ class TransactionScanPostgresTest {
       start.countDown();
       assertThat(List.of(one.get(), two.get())).containsExactlyInAnyOrder("COMPLETED", "SKIPPED");
     }
-    assertThat(count("transaction_evaluations")).isEqualTo(1);
+    assertThat(count("risk_transfer_history")).isEqualTo(1);
   }
 
   @Test
@@ -307,7 +321,7 @@ class TransactionScanPostgresTest {
         FROM transactions WHERE transaction_ref = 'suspect'
         """);
     assertThat(processor.process("suspect")).isEqualTo("COMPLETED");
-    assertThat(count("transaction_evaluations")).isEqualTo(1);
+    assertThat(count("risk_transfer_history")).isEqualTo(1);
     assertThat(count("fraud_transactions")).isEqualTo(1);
     assertThat(count("fraud_rule_hits")).isZero();
     assertThat(jdbc.queryForObject("SELECT review_status FROM fraud_transactions", String.class))
@@ -359,7 +373,7 @@ class TransactionScanPostgresTest {
       jdbc.update("UPDATE transactions SET " + changes.get(i) + " WHERE transaction_ref = ?", ref);
       assertThat(processor.process(ref)).as(changes.get(i)).isEqualTo("FAILED");
     }
-    assertThat(count("transaction_evaluations")).isZero();
+    assertThat(count("risk_transfer_history")).isZero();
   }
 
   @Test
@@ -371,12 +385,12 @@ class TransactionScanPostgresTest {
     try (var lease = lock.tryAcquire()) {
       lease.verify();
       job.scan();
-      assertThat(count("transaction_evaluations")).isZero();
+      assertThat(count("risk_transfer_history")).isZero();
     }
     job.scan();
-    assertThat(count("transaction_evaluations")).isEqualTo(1);
+    assertThat(count("risk_transfer_history")).isEqualTo(1);
     new TransactionScanJob(new TransactionScanLock(source), repository, processor, 1).scan();
-    assertThat(count("transaction_evaluations")).isEqualTo(2);
+    assertThat(count("risk_transfer_history")).isEqualTo(2);
   }
 
   private void fraudFixture() {
@@ -391,6 +405,51 @@ class TransactionScanPostgresTest {
         """,
         java.sql.Timestamp.from(T.minusSeconds(31L * 86400)),
         java.sql.Timestamp.from(T));
+  }
+
+  @Test
+  void sharedHistoryDeduplicatesContextAndIpAndSupportsApiRetriesAfterJob() {
+    fraudFixture();
+    processor.process("suspect");
+    jdbc.update(
+        "UPDATE transactions SET processing_status='PENDING' WHERE transaction_ref='suspect'");
+    processor.process("suspect");
+    assertThat(count("risk_transfer_history")).isEqualTo(2);
+    var mapper = JsonMapper.builder().build();
+    var history = new RiskEvaluationRepository(jdbc, mapper);
+    var transaction = new TransactionTemplate(new DataSourceTransactionManager(source));
+    transaction.executeWithoutResult(
+        ignored -> {
+          var context =
+              history.context(
+                  new com.scrumai.fraud.service.RiskModels.Transfer(
+                      "next", "A", "B", BigDecimal.TEN, "VND", T.plusSeconds(1), null),
+                  history.lock());
+          assertThat(context.outbound()).hasSize(1);
+          var api = new TransactionEvaluationService(history, new RiskScoreEngine(), mapper);
+          var result =
+              api.evaluate(
+                  new EvaluationRequest(
+                      "suspect",
+                      "A",
+                      "NEW",
+                      BigDecimal.valueOf(100000),
+                      "VND",
+                      T.atOffset(java.time.ZoneOffset.UTC),
+                      null));
+          assertThat(result.riskScore()).isEqualTo(75);
+        });
+    assertThat(count("risk_transfer_history")).isEqualTo(2);
+    jdbc.update(
+        """
+        UPDATE transactions SET source_data='{"ip_address":"203.0.113.1"}',
+          source_label='{"is_fraud":"1"}' WHERE transaction_ref='suspect'
+        """);
+    var ip = new IpIntelligenceService(jdbc).load();
+    assertThat(ip.totalTransactions()).isEqualTo(1);
+    assertThat(ip.groups().getFirst().count()).isEqualTo(1);
+    assertThat(ip.groups().getFirst().sourceFraud()).isEqualTo(1);
+    assertThat(ip.groups().getFirst().engineFraud()).isEqualTo(1);
   }
 
   @Test
@@ -427,7 +486,7 @@ class TransactionScanPostgresTest {
                 "SELECT count(*) FROM fraud_transactions WHERE transaction_ref = 'suspect'",
                 Integer.class))
         .isEqualTo(1);
-    assertThat(count("transaction_evaluations")).isEqualTo(21);
+    assertThat(count("risk_transfer_history")).isEqualTo(21);
   }
 
   @Test

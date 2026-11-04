@@ -109,6 +109,7 @@ public class TransactionScanProcessor {
     audit.put("unknownPosting", context.unknownPosting());
     audit.put("contextSource", "transactions");
     audit.put("contextOrdering", "transaction_time, transaction_ref");
+    audit.put("sourceSnapshot", tx);
     audit.put("rules", evaluation.rules());
     audit.put("result", evaluation.result());
     repository.save(tx, evaluation, now, hits, reason, mapper.writeValueAsString(audit));

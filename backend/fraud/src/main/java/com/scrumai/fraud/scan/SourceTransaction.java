@@ -19,7 +19,13 @@ public record SourceTransaction(
     Instant postedAt) {
   public Transfer transfer() {
     return new Transfer(
-        transactionRef, fromAccountRef, toAccountRef, amount, currency, transactionTime, postedAt);
+        transactionRef,
+        fromAccountRef,
+        toAccountRef,
+        new BigDecimal(amount.toBigIntegerExact()),
+        currency,
+        transactionTime,
+        postedAt);
   }
 
   public ChainEntry root() {

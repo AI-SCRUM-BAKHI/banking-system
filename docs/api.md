@@ -78,14 +78,14 @@ Ingest **all successful transfers**, including normal transactions, through this
 endpoint in globally nondecreasing `transactionTime` order. Backfill history first,
 before submitting newer transactions. A database row lock serializes evaluation
 across application instances. Same-reference retries with equivalent normalized
-transaction data return the original result/version before checking chronology;
+transaction data return the latest stored result/version before checking chronology;
 changed data or a new late transaction returns HTTP 409. Failed evaluation rolls
 back history, audit, result, and watermark together.
 
 Migration `V4__create_risk_evaluation_context.sql` adds:
 
-- `risk_transfer_history`: complete successful-transfer input ledger, immutable
-  original result, and audit JSON containing config, context bounds, per-rule
+- `risk_transfer_history`: append-only evaluation ledger with input snapshots,
+  results, and audit JSON containing config, context bounds, per-rule
   status/features/evidence, and stable `riskEventId` hashes.
 - `risk_ingest_state`: global ordering and serialization lock.
 - `risk_account_coverage`: trusted, account-specific contiguous coverage intervals
@@ -129,6 +129,13 @@ require a separate importer/reconciliation extension; retries cannot change an
 existing transfer. Prior online results remain unchanged after coverage advances.
 
 ## Background source evaluation
+
+V8/V9 use `risk_transfer_history` for both evaluators, with no separate
+`transaction_evaluations` table. Raw CSV and ground-truth labels are stored in
+`transactions.source_data` and `transactions.source_label`; structured CSV columns
+(bank, device, IP, etc.) and `customer_id` are populated on the same source row.
+The canonical posting timestamp is `posted_at`; the empty/redundant legacy
+`posting_datetime` alias is removed. Evaluation history and reviewed cases are preserved.
 
 The optional background scanner evaluates rows in `transactions` and creates fraud
 cases internally. Existing POST endpoints remain available with their current
