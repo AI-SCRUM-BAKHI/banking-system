@@ -140,7 +140,8 @@ class AuthControllerTest {
   }
 
   @Test
-  @DisplayName("POST /api/v1/auth/logout - should allow unauthenticated logout when access token expired")
+  @DisplayName(
+      "POST /api/v1/auth/logout - should allow unauthenticated logout when access token expired")
   void logout_withoutPrincipal() throws Exception {
     mockMvc
         .perform(
@@ -165,7 +166,12 @@ class AuthControllerTest {
     UUID userId = UUID.randomUUID();
     CurrentUserResponse profile =
         new CurrentUserResponse(
-            userId, "admin", "Admin User", "admin@bankshield.com", UserRole.ADMIN, UserStatus.ACTIVE);
+            userId,
+            "admin",
+            "Admin User",
+            "admin@bankshield.com",
+            UserRole.ADMIN,
+            UserStatus.ACTIVE);
     when(authService.me(userId)).thenReturn(profile);
 
     Authentication auth = new UsernamePasswordAuthenticationToken(userId.toString(), null);
