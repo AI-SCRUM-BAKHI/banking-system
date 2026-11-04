@@ -345,3 +345,398 @@
     color: #8aa5c7;
     margin-top: 6px;
 }
+.evaluation-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 22px;
+    margin-bottom: 22px;
+    align-items: start;
+}
+.evaluation-editor-tabs {
+    display: flex;
+    background: #f2f5fa;
+    border: 1px solid #e0e8f3;
+    border-radius: 6px;
+    padding: 3px;
+}
+.evaluation-editor-tabs button {
+    background: none;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 9px;
+    color: #8a9db8;
+}
+.evaluation-editor-tabs button.active {
+    background: white;
+    color: #3169de;
+    box-shadow: 0 1px 3px #18314f10;
+}
+.evaluation-form {
+    padding: 0 23px 23px;
+}
+.evaluation-form fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+}
+.evaluation-form fieldset:disabled {
+    opacity: 0.7;
+}
+.evaluation-field-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+.evaluation-form input {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+}
+.evaluation-form-help {
+    display: block;
+    font-size: 8px;
+    color: #8a9db7;
+    line-height: 1.9;
+}
+.evaluation-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-top: 1px solid #e7edf5;
+    padding-top: 19px;
+    margin-top: 21px;
+}
+.evaluation-actions .btn {
+    font-size: 11px;
+    padding: 11px 16px;
+}
+.evaluation-auth-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    font-size: 8px;
+    color: #869fbe;
+    line-height: 1.8;
+    margin-top: 18px;
+}
+.evaluation-auth-note svg {
+    margin-top: 2px;
+}
+.evaluation-json-editor {
+    min-height: 420px;
+    font-size: 10px;
+    border: 1px solid #e3eaf5;
+    border-radius: 7px;
+}
+.evaluation-verdict {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 23px;
+    background: #fbf5e9;
+    border-block: 1px solid #f2e8d3;
+    color: #b49a60;
+}
+.evaluation-verdict.red {
+    background: #fcf0ee;
+    border-color: #f1ddda;
+    color: #c58277;
+}
+.evaluation-verdict.green {
+    background: #eff7f1;
+    border-color: #deeee2;
+    color: #6e9c7d;
+}
+.evaluation-verdict span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 1px;
+}
+.evaluation-verdict h3 {
+    font-size: 17px;
+    font-weight: 500;
+    color: inherit;
+    margin-top: 7px;
+}
+.evaluation-verdict p {
+    font-size: 8px;
+    margin-top: 9px;
+    overflow-wrap: anywhere;
+}
+.evaluation-result-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 25px 23px;
+    gap: 20px;
+}
+.evaluation-result-metrics > div + div {
+    border-left: 1px solid #e6edf6;
+    padding-left: 26px;
+}
+.evaluation-result-metrics > div > span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 7px;
+    color: #90a6c5;
+    letter-spacing: 1px;
+}
+.evaluation-result-metrics strong {
+    display: block;
+    font-family: 'Manrope', sans-serif;
+    font-size: 36px;
+    font-weight: 500;
+    letter-spacing: -1px;
+    color: #52739d;
+    margin: 13px 0;
+}
+.evaluation-result-metrics strong.mono {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 29px;
+    padding-top: 8px;
+}
+.evaluation-result-metrics strong small {
+    font-size: 13px;
+    letter-spacing: 0;
+    color: #a5b6ce;
+}
+.evaluation-score-scale {
+    padding: 0 23px 22px;
+}
+.evaluation-score-scale > div {
+    height: 5px;
+    background: #eaf0f8;
+    border-radius: 5px;
+    overflow: hidden;
+}
+.evaluation-score-scale i {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #86abe4, #d8a27e);
+}
+.evaluation-score-scale > span {
+    display: block;
+    font-size: 8px;
+    color: #8aa1c0;
+    margin-top: 11px;
+    line-height: 1.8;
+}
+.evaluation-partial {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 17px 23px;
+    background: #fffaf0;
+    border-block: 1px solid #f1e9d9;
+    color: #b29c72;
+}
+.evaluation-partial p {
+    font-size: 9px;
+    line-height: 1.9;
+}
+.evaluation-partial svg {
+    margin-top: 3px;
+}
+.evaluation-rule-results {
+    padding: 23px;
+}
+.evaluation-rule-results h3 {
+    font-size: 12px;
+    font-weight: 500;
+    color: #728fb5;
+    display: flex;
+    gap: 9px;
+    align-items: center;
+    margin-bottom: 15px;
+}
+.evaluation-rule-results h3 span {
+    background: #f1f5fc;
+    border-radius: 4px;
+    padding: 3px 6px;
+    font-size: 9px;
+}
+.evaluation-rule-results > article {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    justify-content: space-between;
+    border-top: 1px solid #eaf0f7;
+    padding: 17px 0;
+}
+.evaluation-rule-results b {
+    font-size: 10px;
+    font-weight: 500;
+    color: #7d98ba;
+}
+.evaluation-rule-results code {
+    display: block;
+    font-size: 7px;
+    color: #98adca;
+    margin-top: 8px;
+}
+.evaluation-rule-results small {
+    display: block;
+    font-size: 8px;
+    color: #9bacbf;
+    margin-top: 8px;
+}
+.evaluation-rule-results > p {
+    font-size: 10px;
+    color: #90a7c3;
+    line-height: 1.9;
+}
+.evaluation-rule-results details {
+    margin-top: 18px;
+    border: 1px solid #e4ebf5;
+    border-radius: 6px;
+    padding: 13px;
+}
+.evaluation-rule-results summary {
+    font-size: 10px;
+    cursor: pointer;
+    color: #7d97b9;
+}
+.unevaluated-rule {
+    padding-top: 14px;
+    margin-top: 14px;
+    border-top: 1px solid #e8eef7;
+}
+.unevaluated-rule b {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8px;
+}
+.unevaluated-rule p {
+    font-size: 9px;
+    color: #96aac4;
+    margin-top: 6px;
+    line-height: 1.9;
+}
+.evaluation-raw {
+    padding: 20px 23px;
+    border-top: 1px solid #e5ecf6;
+    background: #fafcff;
+}
+.evaluation-raw summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 10px;
+    color: #7898c2;
+    cursor: pointer;
+}
+.evaluation-raw .text-button {
+    font-size: 8px;
+    margin-top: 20px;
+}
+.evaluation-raw pre {
+    background: #f0f5fd;
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 12px;
+    font-size: 9px;
+    color: #6485b1;
+    line-height: 1.9;
+    max-height: 340px;
+    overflow-y: auto;
+}
+.evaluation-request-id {
+    padding: 17px 23px;
+    border-top: 1px solid #e8eef7;
+    display: flex;
+    gap: 9px;
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: 8px;
+    color: #9aafcb;
+}
+.evaluation-request-id code {
+    font-size: 8px;
+}
+.evaluation-rules-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+    padding: 0 23px 7px;
+}
+.evaluation-rules-grid > article {
+    padding: 18px 16px 20px;
+    border-top: 1px solid #eaf0f7;
+}
+.evaluation-rules-grid > article:nth-child(odd) {
+    border-right: 1px solid #eaf0f7;
+    padding-left: 0;
+}
+.evaluation-rules-grid > article > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+.evaluation-rules-grid code {
+    font-size: 8px;
+    color: #8da5c7;
+}
+.evaluation-rules-grid h3 {
+    font-size: 12px;
+    font-weight: 500;
+    color: #708fb7;
+    margin: 13px 0 10px;
+}
+.evaluation-rules-grid p {
+    font-size: 10px;
+    color: #91a6c1;
+    line-height: 1.9;
+}
+.evaluation-form .form-error small {
+    display: block;
+    font-size: 9px;
+    line-height: 1.9;
+    margin-top: 10px;
+}
+@media (max-width: 1050px) {
+    .evaluation-grid {
+        grid-template-columns: 1fr;
+    }
+}
+@media (max-width: 480px) {
+    .evaluation-form {
+        padding: 0 17px 20px;
+    }
+    .evaluation-field-pair {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+    .evaluation-verdict {
+        padding: 20px 17px;
+        gap: 12px;
+    }
+    .evaluation-verdict h3 {
+        font-size: 16px;
+    }
+    .evaluation-rules-grid {
+        grid-template-columns: 1fr;
+        padding-inline: 17px;
+    }
+    .evaluation-rules-grid > article {
+        padding-inline: 0 !important;
+        border-right: 0 !important;
+    }
+    .evaluation-result-metrics {
+        padding-inline: 17px;
+    }
+    .evaluation-result-metrics strong {
+        font-size: 33px;
+    }
+    .evaluation-rule-results {
+        padding: 20px 17px;
+    }
+    .evaluation-score-scale {
+        padding-inline: 17px;
+    }
+    .page-tabs {
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+    .page-tabs a {
+        margin-left: 0;
+    }
+}

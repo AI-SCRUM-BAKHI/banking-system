@@ -17,13 +17,14 @@ For live mode, the default API base is `/api/v1` on the frontend origin. Docker 
 ## Implemented
 
 - Vietnamese landing page, animated radar/network visual, scroll reveals, pause control, reduced-motion support.
-- Live username/password login, bearer authorization, shared refresh-token rotation on concurrent 401s, logout and session-expiration handling. Tokens/profile are held in sessionStorage for this browser tab.
+- Live username/password login, registration, bearer authorization and refresh-token rotation. The live account is retained when entering demo. The homepage shows the signed-in account and a workspace action, and demo provides a return-to-live action. Session data is held in sessionStorage for this tab.
 - Dashboard using `/fraud-transactions/summary`; charts disclose their scope of at most 100 queried cases, not the full transaction universe.
 - Server-paginated case search, risk/review/date filters, sorting, current-page CSV export.
 - Case drawer with account details, rule hits, graph and review transitions matching the backend: NEW -> REVIEWING -> CONFIRMED_FRAUD or FALSE_POSITIVE.
 - Interactive directed money-flow graph, node selection and related transfers.
 - API query playground for the existing list, summary, detail, rules and graph endpoints. Producer docs include the actual ingest payload and server-side cURL example.
-- Admin-only member listing, creation and enable/disable actions. Public registration explains admin-provisioned access, because backend has no public signup.
+- Detect fraud form/JSON editor calls `POST /api/v1/transactions/evaluate` and renders nullable isFraud, riskScore, evaluationStatus, triggeredRules and unevaluatedRules. Historical CSV examples retry stored inputs idempotently; a fresh sample creates a new reference and timestamp.
+- Admin-only member listing, creation and enable/disable actions. Public registration uses the existing backend registration endpoint.
 
 ## Explicit demo boundaries
 
@@ -31,7 +32,9 @@ Demo mode uses 168 deterministic synthetic cases (29 Oct–4 Nov 2026 Vietnam ti
 
 IP Intelligence is demo-only: the backend DTO has no IP field. Its clusters use documentation IP ranges. In live mode the page explains the unsupported capability and does not fabricate IP data. Confirmed review labels and high-risk classifications are counted separately.
 
-`POST /transactions/evaluate` is a proposal in `docs/Spec.md`, not an existing endpoint. This frontend does not implement a scoring backend. Existing `POST /fraud-transactions` ingests precomputed scoring results; it requires `X-Service-Token` from a trusted producer. The frontend never stores or sends that token.
+The evaluation endpoint requires a service token on the backend. The frontend Nginx gateway first authenticates the caller through `GET /auth/me`, then calls the evaluator with the server-side `APP_SERVICE_TOKEN`. Docker Compose supplies runtime configuration from `backend/.env`; the token is excluded from Vite build variables and browser requests. Nginx envsubst is restricted to that token variable. Local Vite provides the same authenticated gateway and reads the service token only in its server config. Direct producer calls to port 8080 retain the backend service-token contract.
+
+The evaluator stores results and transfer history separately from investigation cases. PARTIAL results below the fraud threshold return isFraud=null. Coverage must reflect the actual known source interval. Demo mode requires real sign-in to run evaluation, while its query playground continues to simulate read responses.
 
 No security certifications, detection accuracy or real banking throughput are claimed. Demo records are not real customer transactions.
 
