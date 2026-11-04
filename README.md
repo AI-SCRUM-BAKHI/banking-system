@@ -103,6 +103,7 @@ The API is stateless. Login returns a 15 minute access token and a seven day ref
 | User management | `/api/v1/users/**` | `ADMIN`, except `PATCH /api/v1/users/me/password` is available to the signed-in user |
 | Fraud investigation | `/api/v1/fraud-transactions/**` | `ADMIN` and `BANK_USER` |
 | Fraud ingest | `POST /api/v1/fraud-transactions` | Trusted producer with `X-Service-Token: <APP_SERVICE_TOKEN>` |
+| Source transaction ingest | `POST /api/v1/transactions` | Trusted producer; saves `PENDING` for background evaluation using `X-Service-Token` |
 | Rule-based fraud detection | `POST /api/v1/transactions/evaluate` | Trusted producer with `X-Service-Token: <APP_SERVICE_TOKEN>` |
 
 See [docs/api.md](docs/api.md) for request and response details. Flyway migration V3 adds the refresh-token table. The migration runs automatically on application startup after the database URL and secrets are configured.

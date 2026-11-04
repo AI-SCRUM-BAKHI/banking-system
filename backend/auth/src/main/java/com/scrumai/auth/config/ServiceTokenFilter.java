@@ -27,6 +27,7 @@ final class ServiceTokenFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
     if (HttpMethod.POST.matches(request.getMethod())
         && ("/api/v1/fraud-transactions".equals(request.getServletPath())
+            || "/api/v1/transactions".equals(request.getServletPath())
             || "/api/v1/transactions/evaluate".equals(request.getServletPath()))
         && !expectedToken.isBlank()) {
       String supplied = request.getHeader("X-Service-Token");

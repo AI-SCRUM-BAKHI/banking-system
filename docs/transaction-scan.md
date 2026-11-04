@@ -37,11 +37,22 @@ All backend instances targeting the source must use the same database and lock k
 
 ## Source contract and context
 
-Insert only successful transfers. No import or reset HTTP endpoint is added.
-The importer supplies source identity, account labels/names, amount, currency,
+Insert only successful transfers. Use `POST /api/v1/transactions` with
+`X-Service-Token: <APP_SERVICE_TOKEN>` to enqueue a source transfer, or load the
+source table through a trusted importer. No reset HTTP endpoint is added.
+The caller supplies source identity, account labels/names, amount, currency,
 `transaction_time` and optional actual `posted_at`. Store explicit timezone offsets.
 Do not infer posting time from transfer time. PostgreSQL timestamps use microsecond
 precision.
+
+The POST API accepts camelCase names (`transactionTime`, `postedAt`, etc.) and
+returns HTTP 201 with `transactionRef`, `processingStatus: "PENDING"`, and
+`createdAt` in the common response envelope. It does not evaluate synchronously.
+Duplicate references return 409 without changing the existing transfer; invalid
+data returns 400. Supplied evaluation fields and other unknown fields are ignored.
+The API validates the v1 limits below before inserting; SQL importers may insert
+wider source values which the scanner will reject. Enable the scanner for queued
+transfers to be evaluated.
 
 `risk_score`, `risk_level`, `fraud_reason`, `rule_hits` and `transaction_chain` are
 outputs; any initially supplied values are ignored by the engine. Defaults `0` and

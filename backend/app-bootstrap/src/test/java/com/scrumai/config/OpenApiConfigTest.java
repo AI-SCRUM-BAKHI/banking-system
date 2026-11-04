@@ -19,6 +19,7 @@ class OpenApiConfigTest {
             .addPathItem("/api/v1/auth/refresh", new PathItem().post(new Operation()))
             .addPathItem("/api/v1/system/ping", new PathItem().get(new Operation()))
             .addPathItem("/api/v1/auth/me", new PathItem().get(new Operation()))
+            .addPathItem("/api/v1/transactions", new PathItem().post(new Operation()))
             .addPathItem(
                 "/api/v1/fraud-transactions",
                 new PathItem().get(new Operation()).post(new Operation()))
@@ -41,7 +42,9 @@ class OpenApiConfigTest {
     assertThat(api.getPaths().get("/api/v1/auth/me").getGet().getSecurity()).isNull();
     assertThat(api.getPaths().get("/api/v1/fraud-transactions").getGet().getSecurity()).isNull();
     for (String path :
-        new String[] {"/api/v1/fraud-transactions", "/api/v1/transactions/evaluate"}) {
+        new String[] {
+          "/api/v1/fraud-transactions", "/api/v1/transactions/evaluate", "/api/v1/transactions"
+        }) {
       assertThat(api.getPaths().get(path).getPost().getSecurity())
           .singleElement()
           .satisfies(r -> assertThat(r).containsOnlyKeys("serviceToken"));

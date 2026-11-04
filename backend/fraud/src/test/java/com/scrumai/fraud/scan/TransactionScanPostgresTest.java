@@ -5,8 +5,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.scrumai.common.exception.GlobalExceptionHandler;
+import com.scrumai.fraud.controller.TransactionController;
 import com.scrumai.fraud.service.RiskScoreEngine;
+import com.scrumai.fraud.service.TransactionIngestService;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -19,9 +25,12 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.TransientDataAccessResourceException;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.support.TransactionTemplate;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -382,6 +391,72 @@ class TransactionScanPostgresTest {
         """,
         java.sql.Timestamp.from(T.minusSeconds(31L * 86400)),
         java.sql.Timestamp.from(T));
+  }
+
+  @Test
+  void postSourceThenScanCreatesFraudAndRejectsDuplicateWithoutOverwriting() throws Exception {
+    fraudFixture();
+    jdbc.update("DELETE FROM transactions WHERE transaction_ref = 'suspect'");
+    String body =
+        """
+        {"transactionRef":"suspect","fromAccountRef":"A","fromAccountMasked":"****1",
+         "toAccountRef":"NEW","toAccountMasked":"****2","amount":100000.00,
+         "currency":"VND","transactionTime":"2026-10-01T19:30:00Z",
+         "riskScore":100,"riskLevel":"CRITICAL","processingStatus":"COMPLETED",
+         "ruleHits":[{"ruleCode":"FAKE"}],"fraudReason":"injected"}
+        """;
+    MockMvc mvc = ingestMvc();
+    mvc.perform(post("/api/v1/transactions").contentType(MediaType.APPLICATION_JSON).content(body))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.data.processingStatus").value("PENDING"));
+    assertThat(value("suspect", "risk_score")).isEqualTo("0.00");
+    assertThat(value("suspect", "rule_hits")).isEqualTo("[]");
+    assertThat(count("fraud_transactions")).isZero();
+    mvc.perform(
+            post("/api/v1/transactions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body.replace("100000.00", "100001")))
+        .andExpect(status().isConflict());
+    assertThat(value("suspect", "amount")).isEqualTo("100000.00");
+    new TransactionScanJob(new TransactionScanLock(source), repository, processor, 100).scan();
+    assertThat(value("suspect", "processing_status")).isEqualTo("COMPLETED");
+    assertThat(value("suspect", "risk_score")).isEqualTo("75.00");
+    // The source baseline is also queued; its dense transfers may trigger frequency rules.
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM fraud_transactions WHERE transaction_ref = 'suspect'",
+                Integer.class))
+        .isEqualTo(1);
+    assertThat(count("transaction_evaluations")).isEqualTo(21);
+  }
+
+  @Test
+  void postSourceRejectsFractionalAmountsAndInvalidAccountOrTimeRelationships() throws Exception {
+    String body =
+        """
+        {"transactionRef":"invalid","fromAccountRef":"A","fromAccountMasked":"****1",
+         "toAccountRef":"B","toAccountMasked":"****2","amount":100,
+         "currency":"VND","transactionTime":"2026-10-01T08:00:00Z"}
+        """;
+    MockMvc mvc = ingestMvc();
+    for (String invalid :
+        List.of(
+            body.replace("\"amount\":100", "\"amount\":1.5"),
+            body.replace("\"toAccountRef\":\"B\"", "\"toAccountRef\":\"A\""),
+            body.replace("2026-10-01T08:00:00Z", "2999-10-01T08:00:00Z"),
+            body.replace("}", ",\"postedAt\":\"2026-10-01T07:59:00Z\"}"))) {
+      mvc.perform(
+              post("/api/v1/transactions").contentType(MediaType.APPLICATION_JSON).content(invalid))
+          .andExpect(status().isBadRequest());
+    }
+    assertThat(count("transactions")).isZero();
+  }
+
+  private MockMvc ingestMvc() {
+    return MockMvcBuilders.standaloneSetup(
+            new TransactionController(new TransactionIngestService(jdbc)))
+        .setControllerAdvice(new GlobalExceptionHandler())
+        .build();
   }
 
   private void insert(

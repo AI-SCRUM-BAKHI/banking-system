@@ -134,3 +134,34 @@ The optional background scanner evaluates rows in `transactions` and creates fra
 cases internally. Existing POST endpoints remain available with their current
 service-token authentication and behavior. See [transaction-scan.md](transaction-scan.md)
 for migration, source contracts, coverage, configuration and manual reevaluation.
+
+### Enqueue a source transaction
+
+`POST /api/v1/transactions` requires `X-Service-Token: <APP_SERVICE_TOKEN>`.
+On Swagger, authorize the `serviceToken` scheme using the raw token.
+
+```json
+{
+  "transactionRef": "SOURCE-20261104-001",
+  "fromAccountRef": "SIM000000071",
+  "fromAccountMasked": "****0071",
+  "fromCustomerName": "Khach hang SIM000000071",
+  "toAccountRef": "SIM000000017",
+  "toAccountMasked": "****0017",
+  "toCustomerName": "Khach hang SIM000000017",
+  "amount": 19135000,
+  "currency": "VND",
+  "transactionTime": "2026-10-27T07:17:00Z"
+}
+```
+
+`postedAt` is optional and must be the actual posting time with an explicit offset,
+at or after `transactionTime` and no later than the time of submission. Optional
+customer names may be omitted. Only positive whole VND amounts are accepted, using
+the scanner's v1 limits. Both account references and masked account labels are required.
+
+HTTP 201 returns `data.transactionRef`, `data.processingStatus` (`PENDING`) and
+`data.createdAt`. Duplicate references return 409; invalid requests return 400.
+Caller-supplied risk scores, rule hits, chains and processing state are ignored.
+The source is committed before evaluation; the scanner later computes its result
+and creates a fraud case when appropriate. If scanning is disabled, it stays queued.

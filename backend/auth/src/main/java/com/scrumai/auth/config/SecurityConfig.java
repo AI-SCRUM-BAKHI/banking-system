@@ -128,6 +128,7 @@ public class SecurityConfig {
                     .requestMatchers(
                         org.springframework.http.HttpMethod.POST,
                         "/api/v1/fraud-transactions",
+                        "/api/v1/transactions",
                         "/api/v1/transactions/evaluate")
                     .hasRole("SERVICE")
                     .requestMatchers("/api/v1/users/me/password")
