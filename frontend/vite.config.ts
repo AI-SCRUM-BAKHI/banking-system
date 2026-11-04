@@ -4,12 +4,19 @@ import tailwindcss from '@tailwindcss/vite'
 import { loadEnv } from 'vite'
 
 export default defineConfig(({ mode }) => {
-    const target = new URL(loadEnv(mode, process.cwd(), 'VITE_').VITE_API_BASE_URL || 'http://localhost:8080/api/v1')
+    const settings = loadEnv(mode, process.cwd(), 'VITE_')
+    const configuredBase = settings.VITE_API_BASE_URL
+    const target = new URL(
+        settings.VITE_API_PROXY_TARGET ||
+            (configuredBase && !configuredBase.startsWith('/') ? configuredBase : 'http://localhost:8080/api/v1'),
+    )
     return {
         plugins: [react(), tailwindcss()],
         server: {
             watch: { ignored: ['**/coverage/**'] },
             proxy: {
+                '/swagger-ui': { target: target.origin, changeOrigin: true },
+                '/v3/api-docs': { target: target.origin, changeOrigin: true },
                 '/api/v1': {
                     target: target.origin,
                     changeOrigin: true,

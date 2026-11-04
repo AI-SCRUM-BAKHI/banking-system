@@ -30,7 +30,7 @@ docker compose -f infra/docker-compose.yml up --build
 
 Open the frontend at http://localhost:5173. The backend API is at http://localhost:8080 and Swagger is at http://localhost:8080/swagger-ui.html. Stop both containers with `Ctrl+C`, or run `docker compose -f infra/docker-compose.yml down` in another terminal.
 
-The frontend API URL is compiled into the static bundle during image build. To use a different API host, set `VITE_API_BASE_URL` in the shell before running Compose and rebuild the image.
+The frontend defaults to `/api/v1` on its own origin. Its Nginx container forwards API and Swagger requests to `backend:8080`, so the same image works on localhost and the public server. The API URL is compiled into the bundle during image build. To call a separate API host directly, set `VITE_API_BASE_URL` before building and allow the frontend origin in `APP_CORS_ALLOWED_ORIGINS`.
 
 ## Run locally
 

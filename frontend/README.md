@@ -12,7 +12,7 @@ npm run dev -- --host 127.0.0.1 --port 5174
 
 Open http://127.0.0.1:5174 . Choose **Khám phá demo** to enter the sandbox without a backend.
 
-For live mode, set `VITE_API_BASE_URL` in `frontend/.env` (default `http://localhost:8080/api/v1`), start the existing backend independently, then log in using a backend-provisioned account. Do not put service tokens or server secrets in any VITE variable. Existing Docker Compose uses the standard Vite port 5173 and remains unchanged.
+For live mode, the default API base is `/api/v1` on the frontend origin. Docker Nginx forwards API and Swagger routes to `backend:8080`. Local Vite forwards API routes to `VITE_API_PROXY_TARGET` (default `http://localhost:8080/api/v1`). Start the backend independently for local development. You can override `VITE_API_BASE_URL` with an absolute URL for a separately hosted backend, which must allow the frontend origin through CORS. Rebuild the frontend image after changing build-time API settings. Docker Compose serves the frontend on port 5173. Keep server secrets outside VITE variables.
 
 ## Implemented
 

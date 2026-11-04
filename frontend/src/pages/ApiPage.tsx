@@ -96,7 +96,7 @@ export function ApiPage() {
     const selected = endpoints.find((e) => e.key === key)!
     const actualId = id || examples.data?.content[0]?.id || ''
     const path = selected.path.replace('{id}', encodeURIComponent(actualId))
-    const base = env.VITE_API_BASE_URL.replace(/\/$/, '')
+    const base = new URL(env.VITE_API_BASE_URL, window.location.origin).toString().replace(/\/$/, '')
     const requiresId = selected.path.includes('{id}')
     async function copy(text: string) {
         try {
