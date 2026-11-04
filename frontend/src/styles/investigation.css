@@ -627,3 +627,15 @@
     font-size: 9px;
     color: #6e8db7;
 }
+
+.ip-group-list p.ip-source-label {
+    color: #b45309;
+    font-size: 12px;
+    font-weight: 700;
+    margin-top: 8px;
+}
+.ip-engine-note {
+    margin: 16px 22px 0;
+    color: #52637d;
+    font-size: 12px;
+}

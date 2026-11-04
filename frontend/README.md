@@ -30,7 +30,7 @@ For live mode, the default API base is `/api/v1` on the frontend origin. Docker 
 
 Demo mode uses 168 deterministic synthetic cases (29 Oct–4 Nov 2026 Vietnam time) and no backend requests. Review changes are in memory and reset on page reload. Demo-created members also exist only until their page is remounted. API playground responses in demo are browser-generated envelopes labeled as simulated. Live API failures never switch to synthetic data automatically.
 
-IP Intelligence is demo-only: the backend DTO has no IP field. Its clusters use documentation IP ranges. In live mode the page explains the unsupported capability and does not fabricate IP data. Confirmed review labels and high-risk classifications are counted separately.
+IP Intelligence supports original imported CSV addresses in live mode and synthetic addresses in demo mode. CSV labels, engine fraud decisions, and confirmed investigation outcomes are counted separately.
 
 The evaluation endpoint requires a service token on the backend. The frontend Nginx gateway first authenticates the caller through `GET /auth/me`, then calls the evaluator with the server-side `APP_SERVICE_TOKEN`. Docker Compose supplies runtime configuration from `backend/.env`; the token is excluded from Vite build variables and browser requests. Nginx envsubst is restricted to that token variable. Local Vite provides the same authenticated gateway and reads the service token only in its server config. Direct producer calls to port 8080 retain the backend service-token contract.
 
@@ -48,6 +48,10 @@ npm run test:coverage
 npm run build
 ```
 
-Unit/contract tests cover backend envelope unwrapping, query filters, review transitions, IP grouping, snapshot date boundaries, token refresh concurrency and reduced-motion metric updates. Browser QA covers demo navigation, review, query playground, filtering, money-flow and responsive layouts. Backend localhost:8080 was unavailable during implementation; live server end-to-end login was not verified.
+Unit/contract tests cover backend envelope unwrapping, query filters, review transitions, IP grouping, snapshot date boundaries, token refresh concurrency and reduced-motion metric updates. Browser QA covers demo navigation, review, query playground, filtering, money-flow and responsive layouts. Production API verification covers authenticated dashboard reads and the real fraud evaluation gateway.
 
 Design reference: Stripe Radar https://stripe.com/radar (product presentation and signal-to-investigation flow; original AEGIS artwork and UI).
+
+### IP Intelligence
+
+Live IP Intelligence calls `GET /api/v1/fraud-transactions/ip-intelligence` using the signed-in account. The backend reads original `sourceTransaction.ip_address` and `sourceScenarioLabel.is_fraud` from imported ledger audit records, groups the complete ledger by IP, and joins existing investigation cases by transaction reference. Missing IPs are excluded from groups. CSV labels, engine decisions, and review confirmations are separate counts; no IP is synthesized in live mode.
