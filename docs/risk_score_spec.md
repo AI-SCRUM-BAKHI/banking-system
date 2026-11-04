@@ -2,7 +2,8 @@
 
 Profile mới là `rule-score-v3-recall`, chọn bằng
 `APP_FRAUD_RULE_VERSION=rule-score-v3-recall`. V1 và v2 tiếp tục có thể chọn
-riêng; mặc định vẫn là v1. Chưa triển khai profile mới lên EC2/Neon production.
+riêng; mặc định của code vẫn là v1. Môi trường triển khai chọn profile thực tế
+qua `APP_FRAUD_RULE_VERSION`; đổi cấu hình không tự chạy lại lịch sử đã hoàn tất.
 
 Giá trị cấu hình được hỗ trợ là `rule-score-v1`, `rule-score-v2` và
 `rule-score-v3-recall`; giá trị khác làm backend khởi động thất bại.
