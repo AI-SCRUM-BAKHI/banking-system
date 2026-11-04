@@ -252,6 +252,74 @@ class TransactionScanPostgresTest {
   }
 
   @Test
+  void v2UsesThirtyMinutePostingContextInBothRepositoriesAndCreatesFraudAtomically() {
+    for (int i = 0; i < 5; i++) {
+      insert(
+          "credit" + i,
+          "SOURCE" + i,
+          "A",
+          400,
+          T.minusSeconds(1200),
+          T.minusSeconds(1000 - 60L * i));
+    }
+    insert("future-credit", "SOURCE-FUTURE", "A", 999999, T, T.plusSeconds(1));
+    insert("first-out", "A", "D", 900, T.minusSeconds(300), null);
+    insert("current", "A", "B", 1000, T, null);
+    jdbc.update(
+        """
+        INSERT INTO risk_account_coverage(account_id, outbound_from, outbound_through,
+          inbound_posted_from, inbound_posted_through, posting_complete)
+        VALUES ('A', ?, ?, ?, ?, TRUE)
+        """,
+        java.sql.Timestamp.from(T.minusSeconds(31L * 86400)),
+        java.sql.Timestamp.from(T),
+        java.sql.Timestamp.from(T.minusSeconds(31L * 86400)),
+        java.sql.Timestamp.from(T));
+    jdbc.update(
+        """
+        INSERT INTO risk_transfer_history(ingest_order, transaction_ref, sender_account_id,
+          receiver_account_id, amount_vnd, currency, transaction_time, posted_at,
+          evaluated_at, request_json, result_json, audit_json)
+        SELECT row_number() OVER (ORDER BY transaction_time, transaction_ref), transaction_ref,
+          from_account_ref, to_account_ref, amount, currency, transaction_time, posted_at,
+          transaction_time + INTERVAL '1 day',
+          json_build_object('transactionRef', transaction_ref,
+            'senderAccountId', from_account_ref, 'receiverAccountId', to_account_ref,
+            'amountVnd', amount, 'currency', currency,
+            'transactionTime', transaction_time, 'postedAt', posted_at)::text, '{}', '{}'
+        FROM transactions WHERE transaction_ref <> 'current'
+        """);
+    jdbc.update(
+        "UPDATE risk_ingest_state SET last_ingest_order=(SELECT max(ingest_order) FROM risk_transfer_history)");
+    var mapper = JsonMapper.builder().build();
+    var history = new RiskEvaluationRepository(jdbc, mapper);
+    var current =
+        new com.scrumai.fraud.service.RiskModels.Transfer(
+            "current", "A", "B", BigDecimal.valueOf(1000), "VND", T, null);
+    var context = history.context(current, history.lock());
+    assertThat(context.inbound()).hasSize(5);
+    assertThat(context.inbound()).noneMatch(tx -> tx.transactionRef().equals("future-credit"));
+    var v2 =
+        new TransactionScanProcessor(
+            repository,
+            new RiskScoreEngine(RiskScoreEngine.V2),
+            mapper,
+            new DataSourceTransactionManager(source));
+    assertThat(v2.process("current")).isEqualTo("COMPLETED");
+    assertThat(value("current", "rule_version")).isEqualTo(RiskScoreEngine.V2);
+    // T is 02:30 local: the independent unusual-hour weight also contributes.
+    assertThat(value("current", "risk_score")).isEqualTo("100.00");
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT score_contribution FROM fraud_rule_hits WHERE rule_code='MULTI_ACCOUNT_FLOW'",
+                BigDecimal.class))
+        .isEqualByComparingTo("80");
+    assertThat(value("current", "evaluation_status")).isEqualTo("PARTIAL");
+    assertThat(count("fraud_transactions")).isEqualTo(1);
+    assertThat(count("transaction_chain")).isEqualTo(1);
+  }
+
+  @Test
   void flowRulesUsePostedTimeWithCertifiedCoverage() {
     Instant noon = Instant.parse("2026-10-01T05:00:00Z");
     insert("in", "C", "A", 100, noon.minusSeconds(200), noon.minusSeconds(90));

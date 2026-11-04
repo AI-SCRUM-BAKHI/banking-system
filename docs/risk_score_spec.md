@@ -1,311 +1,197 @@
 # Đặc tả Risk Score cho giao dịch chuyển khoản
 
-## 1. Phạm vi và quyết định thiết kế
+Profile mới là `rule-score-v3-recall`, chọn bằng
+`APP_FRAUD_RULE_VERSION=rule-score-v3-recall`. V1 và v2 tiếp tục có thể chọn
+riêng; mặc định vẫn là v1. Chưa triển khai profile mới lên EC2/Neon production.
 
-Đây là đặc tả đề xuất `rule-score-v1` cho API đánh giá **một giao dịch đã phát sinh**
-trên dữ liệu mô phỏng, chưa phải cơ chế chặn chuyển tiền trước khi thực hiện.
-Các cửa sổ, dung sai và ngưỡng dưới đây là lựa chọn cho bản demo, cần kiểm chứng
-bằng dữ liệu; không phải thông số đã được xác nhận từ source/config generator.
+Giá trị cấu hình được hỗ trợ là `rule-score-v1`, `rule-score-v2` và
+`rule-score-v3-recall`; giá trị khác làm backend khởi động thất bại.
 
-- Mỗi request chứa một transaction; server lấy lịch sử và baseline để đánh giá.
-- Score thuộc **giao dịch hiện tại, xét tài khoản gửi**. Không cộng score của các
-  event cũ không liên quan vào giao dịch mới.
-- Chỉ dùng dữ liệu đã biết tại thời điểm đánh giá. Chưa đủ giao dịch hình thành
-  chuỗi thì rule chuỗi chưa kích hoạt; không dùng giao dịch tương lai.
-- Các giao dịch đầu chuỗi giữ kết quả online ban đầu. Nếu phân tích lại để điều
-  tra, lưu thành kết quả hồi cứu riêng.
-- `is_fraud` của generator là nhãn scenario để đối chiếu; `isFraud` trong API là
-  dự đoán theo chính sách bên dưới, không phải xác nhận gian lận thực tế.
+Mục tiêu thay đổi: phát hiện nhiều giao dịch đáng ngờ hơn, chấp nhận thêm cảnh
+báo nhầm để review. Không tối ưu theo Precision hoặc F1 đơn thuần. Báo cáo thêm
+F2 (đặt trọng số Recall cao hơn Precision) và tỷ lệ phát hiện trên toàn bộ nhãn
+fraud, kể cả những giao dịch chưa đủ dữ liệu để kết luận.
 
-## 2. Đầu vào và context
+## Chính sách online
 
-### 2.1. Transaction
+Ngưỡng fraud giữ **60**, cap score 100, risk levels và suppression trong từng
+nhóm giữ nguyên. Rule chỉ dùng thông tin đã biết tại transactionTime hiện tại.
 
-Các trường bắt buộc: `transactionRef`, `senderAccountId`, `receiverAccountId`,
-`amountVnd`, `currency`, `transactionTime`. V1 chỉ nhận `currency=VND`, số tiền
-nguyên dương và hai tài khoản khác nhau. Timestamp phải có UTC offset và được
-chuẩn hóa về UTC. Nếu có `postedAt` (thời điểm ghi có), giá trị phải lớn hơn hoặc
-bằng `transactionTime` và không sau thời điểm đánh giá.
-
-Không dùng score hoặc nhãn scenario do client cung cấp để chấm điểm.
-
-### 2.2. Context do server quản lý
-
-- Lịch sử giao dịch thành công, gồm cả giao dịch bình thường: sender, receiver,
-  amount, thời gian giao dịch và posting nếu nguồn cung cấp.
-- Baseline amount và lịch sử người nhận của tài khoản gửi.
-- Mốc coverage, thời gian mở tài khoản nếu có, và độ đầy đủ của dữ liệu. Không có
-  bản ghi trong khoảng bị thiếu dữ liệu không đồng nghĩa không có giao dịch.
-- Inbound chỉ được dùng làm nguồn tiền nếu đã posting trước outbound đang xét.
-
-Chỉ có bảng kết quả fraud là chưa đủ. Context phải đến từ nguồn đáng tin cậy;
-không chuyển lỗi truy vấn thành lịch sử rỗng. Thiếu context bắt buộc cho một rule
-thì ghi `NOT_EVALUATED`, không coi là rule không khớp.
-
-### 2.3. Thời gian và idempotency
-
-Gọi `t` là `transactionTime` hiện tại. Cửa sổ `(t-W, t]` loại mốc đầu và gồm mốc
-cuối. Chỉ dùng giao dịch đã ingest trước request này, cộng giao dịch hiện tại khi
-rule yêu cầu. Giao dịch đã ingest có cùng timestamp được tính vào rolling window;
-baseline và lịch sử người nhận chỉ dùng giao dịch có timestamp `< t`.
-
-Bản demo ingest theo `transactionTime` không giảm trên toàn luồng, kể cả khi nạp
-lịch sử; xử lý tuần tự/atomic để tránh hai request bỏ sót nhau. Giao dịch mới có
-thời gian nhỏ hơn mốc đã xử lý bị từ chối rõ ràng. Late event/replay là phần mở
-rộng; không âm thầm chấm bằng dữ liệu tương lai.
-
-`transactionRef` là khóa idempotency, không phải feature dự đoán. Kiểm tra khóa
-trước kiểm tra thứ tự thời gian: trùng khóa và cùng dữ liệu trả kết quả cũ; trùng
-khóa khác dữ liệu trả conflict. Retry không tăng count, thêm lịch sử hay tạo event
-mới. Lưu kết quả, lịch sử và khóa idempotency trong cùng đơn vị atomic.
-
-## 3. Điểm và nhãn đầu ra
-
-| Tổng điểm | `riskLevel` |
-|---:|---|
-| 0-29 | LOW |
-| 30-59 | MEDIUM |
-| 60-79 | HIGH |
-| 80-100 | CRITICAL |
-
-```text
-riskScore = min(100, tổng scoreContribution sau khi loại đóng góp trùng)
-fraudThreshold = 60  // mặc định cho demo, lưu cùng ruleVersion
-```
-
-Rule có điểm đóng góp, không có `riskLevel` riêng. Level suy ra từ tổng điểm.
-Score 80 không có nghĩa xác suất fraud là 80%.
-
-| Trạng thái | `isFraud` | `decision` |
-|---|---|---|
-| Score >= 60, kể cả còn rule chưa đánh giá được | `true` | FRAUD |
-| Score < 60, mọi rule đều đánh giá được | `false` | NOT_FRAUD |
-| Score < 60, còn rule chưa đánh giá được | `null` | INSUFFICIENT_DATA |
-
-`evaluationStatus=COMPLETE` khi mọi rule đều đánh giá được, còn lại là `PARTIAL`.
-Khi partial, score và level chỉ phản ánh các tín hiệu đã tính được. Chính sách
-lấy max trong từng nhóm ở mục 5 bảo đảm thêm tín hiệu không làm score giảm.
-
-Không ép thiếu lịch sử thành `false`. Nếu tích hợp bắt buộc nhận đúng boolean,
-trường hợp chưa đủ dữ liệu phải trả lỗi nghiệp vụ riêng. `FRAUD` là nhãn dự đoán
-phục vụ demo; quy trình review xác nhận là bước riêng.
-
-## 4. Rule và điều kiện kích hoạt
-
-### 4.1. Baseline dùng chung
-
-```text
-history = giao dịch gửi thành công của sender trong [t - 30 ngày, t)
-baselineMedianVnd = median(history.amountVnd)
-amountRatio = amountVnd / baselineMedianVnd
-```
-
-Cần coverage đầy đủ 30 ngày và ít nhất 20 mẫu; tài khoản mới hơn 30 ngày cần lịch
-sử đầy đủ từ khi mở tài khoản và vẫn đủ 20 mẫu. Thiếu điều kiện thì hai rule amount
-là `NOT_EVALUATED`, không thay bằng trung bình toàn hệ thống.
-
-Median của số mẫu chẵn là trung bình hai phần tử giữa. Dùng decimal, không làm
-tròn ratio trước khi so ngưỡng. Không đưa giao dịch hiện tại vào baseline, không
-lấy median profile bí mật của generator hoặc lọc lịch sử theo nhãn fraud.
-
-### 4.2. Bảng rule
-
-| Rule | Điều kiện | Điểm |
-|---|---|---:|
-| `AMOUNT_SPIKE` | `amountRatio > 8` | 35 |
-| `NEW_BENEFICIARY_LARGE` | `amountRatio > 8` và chưa gửi tới receiver trong `[t - 30 ngày, t)` | 50 |
-| `UNUSUAL_HOUR` | Giờ theo `Asia/Ho_Chi_Minh` thuộc `[02:00, 04:00)` | 25 |
-| `FREQUENCY_SPIKE` | Ít nhất 12 giao dịch gửi của sender trong `(t - 600 giây, t]`, gồm giao dịch hiện tại | 45 |
-| `STRUCTURED_SPLIT` | Chín giao dịch tới receiver hiện tại thỏa mục 4.3 | 55 |
-| `RAPID_PASS_THROUGH` | Outbound hiện tại và inbound gần nhất thỏa mục 4.4 | 65 |
-| `MULTI_ACCOUNT_FLOW` | Inbound/outbound quanh sender thỏa mục 4.5 | 80 |
-
-“Người nhận mới” nghĩa là **chưa xuất hiện trong 30 ngày**, không phải chưa từng
-xuất hiện suốt đời tài khoản. Cần coverage 30 ngày hoặc đầy đủ từ lúc mở tài khoản;
-thiếu dữ liệu thì `NOT_EVALUATED`.
-
-Frequency cần coverage đủ 600 giây, hoặc đầy đủ từ khi mở tài khoản nếu mới hơn.
-Mọi rule dùng cửa sổ lịch sử bên dưới cũng chấp nhận coverage đầy đủ từ khi mở tài
-khoản nếu tuổi tài khoản ngắn hơn cửa sổ yêu cầu.
-
-Hour dùng khung cố định cho demo, chưa học khung hoạt động riêng của tài khoản.
-Đúng 02:00 được tính, đúng 04:00 không được tính. Hour đơn lẻ là 25 điểm, LOW.
-
-### 4.3. STRUCTURED_SPLIT
-
-Lấy chín giao dịch gần nhất của cùng cặp sender/receiver trong `(t - 3600 giây, t]`,
-gồm giao dịch hiện tại; sắp theo thời gian, cùng timestamp theo thứ tự ingest.
-Không tìm tập con khác để cố khớp. Điều kiện đồng thời:
-
-- Đủ chín giao dịch, amount bằng nhau chính xác theo VND.
-- Mỗi khoảng cách giữa hai giao dịch liên tiếp trong `[300, 420]` giây.
-- Receiver đã có ít nhất một giao dịch từ sender trong 30 ngày **trước giao dịch
-  đầu của nhóm**, không dùng các khoản trong nhóm để xác định người nhận cũ.
-
-Cần coverage đủ cửa sổ một giờ. Có dưới chín giao dịch trong cửa sổ đầy đủ thì
-không kích hoạt. Khi có chín giao dịch thỏa amount và thời gian, cần thêm coverage
-để xác định người nhận cũ; thiếu phần này thì `NOT_EVALUATED`. Rule này là mẫu
-chặt cho synthetic, chưa phát hiện chia nhỏ không đều hoặc amount gần bằng nhau.
-
-### 4.4. RAPID_PASS_THROUGH
-
-Với sender `A`, lấy inbound đã posting gần nhất vào `A` trong `[t - 120 giây, t)`;
-nếu cùng posting time, chọn `transactionRef` nhỏ nhất theo thứ tự từ điển.
-Chỉ kiểm tra inbound đó, không thử mọi tập con. Điều kiện:
-
-```text
-60 <= (t - inbound.postedAt) tính bằng giây <= 120
-0.95 <= current.amountVnd / inbound.amountVnd <= 1.00
-```
-
-Inbound sender, `A` và outbound receiver phải là ba tài khoản khác nhau. Cần
-coverage inbound đủ 120 giây và thông tin posting. Không có inbound trong cửa sổ
-đầy đủ là không kích hoạt; thiếu dữ liệu posting cần thiết là `NOT_EVALUATED`.
-Đây là tín hiệu về thời gian/số tiền, không chứng minh nguồn gốc chính xác của
-khoản tiền trong tài khoản có số dư trộn lẫn.
-
-### 4.5. MULTI_ACCOUNT_FLOW
-
-Với sender `A` và outbound hiện tại:
-
-1. `I` là **toàn bộ** inbound vào `A` có `postedAt` trong `(t - 600 giây, t)`.
-2. `I` rỗng thì không kích hoạt. Ngược lại, `p` là posting time muộn nhất của `I`.
-3. `O` là **toàn bộ** outbound từ `A` có `transactionTime` trong `(p, t]`, gồm
-   giao dịch hiện tại.
-4. Kích hoạt khi `I` có ít nhất năm sender khác nhau, `O` có ít nhất hai receiver
-   khác nhau và `0.95 <= sum(O.amountVnd) / sum(I.amountVnd) <= 1.00`.
-
-Các tập sender inbound và receiver outbound phải không giao nhau để loại mẫu
-chuyển vòng đơn giản. Self-transfer đã bị loại từ đầu vào. Không chọn tập con để
-đạt tỷ lệ. Cần coverage inbound/outbound đủ 10 phút và dữ liệu posting; thiếu
-context cần thiết thì `NOT_EVALUATED`. Truy vấn inbound theo `transactionTime`
-không thay thế được coverage theo `postedAt`.
-
-Outbound trước hoặc bằng lần posting cuối không thuộc `O`. Giao dịch không liên
-quan trong cửa sổ có thể làm rule không khớp; đây là giới hạn của bản demo.
-
-## 5. Kết hợp rule và chống cộng trùng
-
-Chỉ cộng match của giao dịch hiện tại; không cộng score của kết quả trước.
-Mỗi rule đóng góp tối đa một lần trong response, dù có nhiều giao dịch bằng chứng.
-
-| Nhóm | Cách lấy điểm |
+| Rule | V3-recall |
 |---|---|
-| Amount | `max(AMOUNT_SPIKE, NEW_BENEFICIARY_LARGE)` |
-| Temporal pattern | `max(FREQUENCY_SPIKE, STRUCTURED_SPLIT)` |
-| Money flow | `max(RAPID_PASS_THROUGH, MULTI_ACCOUNT_FLOW)` |
-| Hour | Điểm `UNUSUAL_HOUR` nếu khớp |
+| AMOUNT_SPIKE | Amount **>4× median** outbound 30 ngày; 60 điểm |
+| NEW_BENEFICIARY_LARGE | Receiver chưa xuất hiện trong baseline 30 ngày, amount **>2,5× median**; 65 điểm; không bắt buộc AMOUNT_SPIKE cũng trúng |
+| UNUSUAL_HOUR | Giờ Việt Nam trong `[02:00,04:00)`; **60 điểm**, có thể cảnh báo riêng lẻ |
+| FREQUENCY_SPIKE | **≥2 outbound trong `(t−120s,t]`**, gồm hiện tại; 65 điểm |
+| STRUCTURED_SPLIT | **2 khoản bằng tiền** gần nhất cùng sender/receiver trong một giờ, gap **120–900s**; bỏ qua khoản khác tiền xen giữa; receiver có quan hệ trong 30 ngày trước khoản đầu của cặp; 70 điểm |
+| RAPID_PASS_THROUGH | Inbound hợp lệ mới nhất đã posting trước outbound **30–600s**, tỷ lệ out/in **0,8–1,2**, ba tài khoản khác nhau; 65 điểm; không yêu cầu baseline amount đủ |
+| MULTI_ACCOUNT_FLOW | Toàn bộ inbound đã posting trong 30 phút; **≥3 nguồn, ≥1 đích**, hai tập không giao nhau, toàn bộ outbound sau posting cuối có tỷ lệ out/in **0,4–1,2**; 80 điểm |
 
-Cộng bốn nhóm rồi cap ở 100. Các nhóm vẫn có thể tương quan, cần calibration bằng
-dữ liệu. Giữ tất cả rule khớp trong `triggeredRules`: rule thắng có đóng góp bằng
-trọng số, rule bị loại có `scoreContribution=0` và `suppressedBy` chỉ ra rule thắng.
-Rule chưa đánh giá được nằm trong `unevaluatedRules`, kèm lý do; khác với không khớp.
+AMOUNT/NEW_BENEFICIARY vẫn cần coverage/baseline hợp lệ và ít nhất 20 mẫu.
+Không thay baseline bị thiếu bằng dữ liệu toàn hệ thống. Ngưỡng so sánh amount
+là nghiêm ngặt `>`; ratio dùng decimal/cross multiplication, không làm tròn.
 
-`riskEventId` do engine tạo cho từng match: hash chuẩn hóa của `ruleVersion`,
-`ruleCode`, tài khoản đang đánh giá và tập `transactionRef` bằng chứng đã sắp xếp.
-Match với tập bằng chứng khác nhau có thể là cửa sổ chồng lấn; **không cộng các ID
-này thành score tài khoản**. Gom thành incident điều tra là bước riêng, ngoài v1.
+Flow cần coverage posting và thông tin posting đầy đủ cho cửa sổ tương ứng;
+không tự suy ra posting time từ transaction time. Rapid tìm inbound **hợp lệ**
+mới nhất, bỏ qua inbound gần hơn nhưng không thỏa delay/ratio/tài khoản. Đây là
+tìm từng credit phù hợp, không tối ưu một tổ hợp tùy ý để ép tỷ lệ khớp.
 
-Không dùng `is_fraud`, `fraud_type`, `fraud_event_id`, `suspicious_account_id`,
-`data_split` hoặc quy luật đặt `transactionRef` để chấm điểm. Nhãn generator chỉ
-được dùng sau dự đoán để đánh giá. ID được dùng cho idempotency, liên kết bằng
-chứng và thứ tự ổn định, không được cộng điểm. Device, IP, location và OS chưa có
-rule đóng góp điểm trong phiên bản này.
+Multi vẫn dùng toàn bộ dòng tiền trong cửa sổ, không chọn subset để khớp. Cửa
+sổ, nguồn/đích và tỷ lệ đã nới rộng là tín hiệu review có độ nhạy cao, không
+khẳng định các dòng tiền có nguồn gốc chính xác hay fraud đã được xác nhận.
 
-## 6. Contract API đề xuất
+Thiếu dữ liệu vẫn là NOT_EVALUATED/PARTIAL. Một tín hiệu đủ 60 điểm có thể trả
+FRAUD dù partial; chưa đủ điểm và còn thiếu dữ liệu vẫn là INSUFFICIENT_DATA.
+Không tự coi unknown là giao dịch an toàn.
 
-Endpoint mới: `POST /api/v1/transactions/evaluate`. Đây là đề xuất, chưa phải API
-đã có trong repo. API ingest kết quả fraud hiện tại vẫn là luồng riêng.
+## Online và liên kết để điều tra là hai đầu ra khác nhau
 
-Phần `data` trong envelope chung của backend, ví dụ khi context đầy đủ:
+Audit của các rule temporal/flow thêm `features.patternTransactionRefs`:
 
-```json
-{
-  "transactionRef": "TX-001",
-  "isFraud": true,
-  "decision": "FRAUD",
-  "riskScore": 95,
-  "riskLevel": "CRITICAL",
-  "evaluationStatus": "COMPLETE",
-  "fraudThreshold": 60,
-  "ruleVersion": "rule-score-v1",
-  "triggeredRules": [
-    {
-      "ruleCode": "AMOUNT_SPIKE",
-      "scoreContribution": 0,
-      "suppressedBy": "NEW_BENEFICIARY_LARGE"
-    },
-    {
-      "ruleCode": "NEW_BENEFICIARY_LARGE",
-      "scoreContribution": 50
-    },
-    {
-      "ruleCode": "FREQUENCY_SPIKE",
-      "scoreContribution": 45
-    }
-  ],
-  "unevaluatedRules": []
-}
+- Frequency: các giao dịch thực sự trong cửa sổ burst.
+- Split: hai khoản của cặp hiện tại; **không kèm các khoản baseline cũ** dùng để
+  xác nhận người nhận.
+- Rapid: credit phù hợp và outbound hiện tại.
+- Multi: toàn bộ inbound/outbound thuộc pattern đang đánh giá.
+
+Khi một hồ sơ có kết quả online FRAUD và rule MATCHED, script offline
+`linked_investigation.py` dùng các ref này để xuất danh sách giao dịch cần điều
+tra liên quan. Không dùng `audit.evidence` chung vì trường đó có thể chứa lịch
+sử nền. Không dùng nhãn CSV để quyết định liên kết, không liên kết từ rule chưa
+trúng, không gắn cờ cả tài khoản hoặc mọi giao dịch trong baseline.
+
+Kết quả liên kết không sửa score, decision, lịch sử hoặc review của giao dịch
+cũ; không tự tạo fraud case cho mọi giao dịch liên quan. Nó là báo cáo bao phủ
+điều tra offline có nguồn evidence truy vết được, chưa phải API/job ghi ngược
+kết quả hồi cứu vào production.
+
+`known_by_source_time` là timestamp của giao dịch root đầu tiên tạo liên kết
+trong replay, không phải thời điểm giao dịch sớm hơn đã được cảnh báo online,
+cũng không phải timestamp triển khai thực tế. Vì vậy không trình bày tỷ lệ
+liên kết hồi cứu như Recall của API evaluate tại thời điểm giao dịch phát sinh.
+
+## Đánh giá và bật thử
+
+Đo trên hai seed mới 20261107/20261108, tổng **29.981 giao dịch** và 396 nhãn fraud.
+Baseline là v2, candidate v3 được chốt trên bộ phát triển trước khi đo holdout.
+
+| Chỉ số | V2 online | V3 online | Liên kết offline |
+|---|---:|---:|---:|
+| TP | 266 | 334 | 392 |
+| FP | 1 | 341 | 625 |
+| FN | 128 | 60 | 4 |
+| Fraud chưa kết luận | 2 | 2 | 0 |
+| Phát hiện / toàn bộ nhãn fraud | 67,17% | 84,34% | 98,99% |
+| Precision | 99,63% | 49,48% | 38,54% |
+| Recall trên phần có quyết định | 67,51% | 84,77% | 98,99% |
+| F2 trên phần có quyết định | 72,16% | 74,19% | 75,36% |
+
+Recall = TP/(TP+FN); F2 = 5TP/(5TP+4FN+FP). Unknown được thống kê riêng,
+không gán normal hoặc FN. Tỷ lệ phát hiện trên toàn bộ nhãn fraud dùng cả
+unknown trong mẫu số. Các seed mới vẫn cùng generator, chưa chứng minh chất
+lượng trên dữ liệu ngân hàng độc lập. Không chỉnh rule theo kết quả holdout.
+
+```dotenv
+APP_FRAUD_RULE_VERSION=rule-score-v3-recall
+APP_FRAUD_SCAN_ENABLED=true
 ```
 
-Response có thể chỉ trả tóm tắt như trên. Audit server phải lưu `evaluatedAt`,
-version/config, độ đầy đủ và mốc context, trạng thái từng rule, feature/baseline,
-`riskEventId`, transaction bằng chứng và lý do kết quả. Thay đổi ngưỡng, trọng số
-hoặc điều kiện phải tạo version/config mới; retry giữ kết quả/version ban đầu.
+Không cần migration. Restart để đổi profile; API retry vẫn trả kết quả đã lưu
+cho cùng ref/dữ liệu. Muốn chấm lại cần job/reset source trên database thử
+nghiệm. Lịch sử version cũ và review được giữ nguyên. Database dùng cho các
+benchmark là các database PostgreSQL cục bộ mới, không phải Neon production.
 
-## 7. Ví dụ và các ca cần kiểm chứng
+## Đầu vào, context và idempotency
 
-Giả định context đầy đủ và không có rule khác kích hoạt:
+API `POST /api/v1/transactions/evaluate` yêu cầu `X-Service-Token` và body:
+transactionRef, senderAccountId, receiverAccountId, amountVnd, currency,
+transactionTime, postedAt tùy chọn. VND nguyên dương, hai tài khoản khác nhau,
+timestamp có UTC offset. postedAt nếu có phải từ transactionTime đến thời
+điểm đánh giá, không tự gán bằng transactionTime.
 
-| Trường hợp | Score | Level | `isFraud` |
-|---|---:|---|---|
-| Không có rule | 0 | LOW | false |
-| Chỉ hour | 25 | LOW | false |
-| Chỉ amount spike | 35 | MEDIUM | false |
-| New beneficiary và amount spike | 50 | MEDIUM | false |
-| Frequency và structured split | 55 | MEDIUM | false |
-| Amount spike và hour | 60 | HIGH | true |
-| Chỉ rapid pass-through | 65 | HIGH | true |
-| Hai rule money flow cùng khớp | 80 | CRITICAL | true |
-| New beneficiary và frequency | 95 | CRITICAL | true |
-| Hai rule trên và hour | 100 | CRITICAL | true |
+`POST /api/v1/transactions` lưu source để job xử lý. Job đọc `transactions`,
+tạo lịch sử mới trong `risk_transfer_history` và chỉ tạo fraud case khi
+isFraud=true. `POST /api/v1/fraud-transactions` vẫn nhận kết quả đã tính từ
+producer. Lưu source result/history/fraud của một lần job phải atomic; hồ sơ
+và review đã tồn tại giữ nguyên.
 
-Các ca biên khi triển khai:
+Baseline là outbound của sender trong `[t−30 ngày,t)`, ít nhất 20 mẫu,
+median chẵn là trung bình hai phần tử giữa. Cần coverage 30 ngày hoặc đầy đủ
+từ thời điểm mở tài khoản nếu biết; tài khoản mới vẫn cần 20 mẫu. Không tự
+xác nhận coverage vì bảng có dữ liệu. Nhãn CSV, profile ẩn của generator,
+device/IP và score cũ không tham gia chấm điểm.
 
-- Đúng `8 × median` không kích hoạt; lớn hơn mới kích hoạt.
-- Baseline 19 mẫu chưa đủ; 20 mẫu và đủ coverage thì đánh giá được.
-- Giao dịch thứ 11 trong burst chưa kích hoạt frequency; thứ 12 kích hoạt.
-  Giao dịch đúng `t - 600 giây` bị loại khỏi cửa sổ.
-- Receiver xuất hiện đúng `t - 30 ngày` là đã có lịch sử; timestamp bằng `t`
-  không dùng làm lịch sử người nhận.
-- Split: khoảng cách 300/420 giây được tính, 299/421 giây không được tính.
-- Pass-through: tỷ lệ 0.95/1.00 và độ trễ 60/120 giây được tính; ngoài khoảng
-  hoặc outbound bằng thời điểm posting không được tính.
-- Multi-flow: bốn nguồn hoặc một đích không đủ; outbound trước/bằng lần posting
-  cuối không thuộc `O`.
-- Nhận giao dịch thứ 12 không sửa kết quả online của 11 giao dịch trước.
-- Retry không tăng count; trùng ID khác dữ liệu hoặc giao dịch đến trễ trả lỗi.
-- Thiếu baseline, các rule còn lại không khớp: score 0, PARTIAL, `isFraud=null`.
-- Thiếu baseline nhưng pass-through khớp: score 65, PARTIAL, `isFraud=true`.
-- Mốc 29/30, 59/60, 79/80 đổi level đúng bảng; tổng trên 100 được cap.
+API lấy context từ evaluation ledger và giữ global watermark: giao dịch mới
+đến muộn trả 409. API cùng ref/cùng dữ liệu trả kết quả/version đã lưu, dù
+cấu hình rule đã đổi; ref cũ khác dữ liệu trả 409. Retry không thêm count/history.
 
-## 8. Đánh giá với dữ liệu synthetic
+Job lấy context trực tiếp từ source, không phụ thuộc processing status của
+lịch sử. Loại giao dịch hiện tại, không lấy tương lai; outbound cùng timestamp
+dùng thứ tự `(transaction_time, transaction_ref)`. Baseline/receiver history
+chỉ dùng timestamp `<t`. Job bỏ global watermark để hỗ trợ backfill; reset
+PENDING tạo lần đánh giá mới, không ghi đè lịch sử cũ.
 
-Nếu cấu hình có sáu event mỗi loại, số giao dịch/event lần lượt `1, 12, 1, 1, 9,
-2, 7`, số giao dịch mang nhãn scenario là:
+Hai repository nạp inbound theo posting time đến 30 phút. Mỗi profile tự lọc
+đúng cửa sổ; v1 vẫn chỉ dùng 10 phút cho multi, không mở rộng rule vì superset
+context. Thiếu context/posting/coverage ghi NOT_EVALUATED; lỗi truy vấn không
+được thay bằng lịch sử rỗng.
 
-```text
-6 × (1 + 12 + 1 + 1 + 9 + 2 + 7) = 198
+## Score, suppression và đầu ra
+
+`riskScore = min(100, tổng điểm lớn nhất của mỗi nhóm)`.
+
+| Nhóm | Điểm được cộng |
+|---|---|
+| Amount | max(AMOUNT_SPIKE, NEW_BENEFICIARY_LARGE) |
+| Temporal | max(FREQUENCY_SPIKE, STRUCTURED_SPLIT) |
+| Flow | max(RAPID_PASS_THROUGH, MULTI_ACCOUNT_FLOW) |
+| Hour | UNUSUAL_HOUR nếu khớp |
+
+Giữ mọi match trong triggeredRules. Rule bị suppression đóng góp 0 và có
+suppressedBy; rule thiếu dữ liệu nằm trong unevaluatedRules. Score không phải
+xác suất fraud. riskLevel: LOW 0–29, MEDIUM 30–59, HIGH 60–79, CRITICAL 80–100.
+
+| Điều kiện | isFraud | decision |
+|---|---|---|
+| Score ≥60, kể cả partial | true | FRAUD |
+| Score <60, mọi rule đã đánh giá | false | NOT_FRAUD |
+| Score <60, còn rule thiếu dữ liệu | null | INSUFFICIENT_DATA |
+
+evaluationStatus là COMPLETE khi mọi rule đều đánh giá được, còn lại PARTIAL.
+Audit lưu evaluatedAt, version/config, coverage, feature, trạng thái từng rule,
+evidence và riskEventId. ID hash version, rule code, tài khoản và tập ref
+evidence đã sắp xếp; không cộng các event ID thành score tài khoản.
+
+## Tương thích với v1 và v2
+
+| Rule | V1 | V2 | V3-recall |
+|---|---|---|---|
+| Amount | >8× median; 35 điểm | >8×; 60 điểm | >4×; 60 điểm |
+| New beneficiary | >8×; 50 điểm | >8×; 65 điểm | >2,5×; 65 điểm |
+| Hour | 25 điểm | 25 điểm | 60 điểm |
+| Frequency | ≥12/600s; 45 điểm | ≥3/120s; 65 điểm | ≥2/120s; 65 điểm |
+| Split | 9 khoản, gap 300–420s; 55 điểm | 3 khoản, gap 240–480s; 70 điểm | 2 khoản bằng tiền, gap 120–900s; 70 điểm |
+| Rapid | Latest credit, 60–120s, ratio 0,95–1; 65 điểm | Như v1, thêm outbound >8× median/baseline đủ; 75 điểm | Latest valid credit, 30–600s, ratio 0,8–1,2; 65 điểm |
+| Multi | 600s, ≥5 nguồn/≥2 đích, ratio 0,95–1; 80 điểm | 1800s, các điều kiện khác như v1 | 1800s, ≥3 nguồn/≥1 đích, ratio 0,4–1,2; 80 điểm |
+
+V1/v2 split lấy đúng N khoản gần nhất cùng cặp, không bỏ khoản khác tiền xen
+giữa; mọi version kiểm tra quan hệ receiver trước nhóm. Giữ nguyên boundary,
+coverage, suppression và ngưỡng fraud 60 của các version cũ.
+
+## Kiểm thử
+
+Quality gate backend đã đạt, gồm regression v1/v2, PostgreSQL integration và
+15 ca unit v3 về boundary amount/time/ratio, posting/coverage thiếu, future
+transaction và pattern refs tách khỏi baseline. Các script có 12 ca kiểm tra
+confusion matrix, abstention, F2, ref và liên kết evidence hợp lệ.
+
+Chạy từ root repo:
+
+```bash
+JAVA_HOME=/path/to/jdk21 bash backend/gradlew -p backend qualityGate
+python3 -m unittest discover -s backend/scripts/evaluation-benchmark -p 'test_*.py' -q
 ```
 
-Đây là phép tính theo cấu hình mô tả, chưa xác minh generator trong repo này.
-Không kỳ vọng 198 giao dịch đều có `isFraud=true`: một số rule riêng lẻ dưới
-ngưỡng 60, các giao dịch đầu chuỗi chưa đủ bằng chứng tại thời điểm đến.
-
-Replay theo thời gian, chỉ dùng lịch sử đã biết. Báo cáo coverage/partial rate,
-precision/recall trên dự đoán có nhãn, số ca chưa đủ dữ liệu và khả năng phát hiện
-**event** bên cạnh chỉ số transaction. Không bỏ các ca partial khỏi báo cáo mà
-không công bố số lượng. Không dùng nhãn scenario để chọn bằng chứng hoặc baseline.
-
-Chưa tự động khóa tài khoản từ nhãn demo. Dùng dữ liệu thật, thay ngưỡng và chính
-sách hành động cần được đánh giá riêng trước khi triển khai production.
+PostgreSQL integration cần SCAN_TEST_DATABASE_URL trỏ vào database thử nghiệm
+và SCAN_TEST_DATABASE_USER/PASSWORD tương ứng. Benchmark runner chỉ chấp nhận
+localhost, dùng database mới cho mỗi run; không nạp nhãn hoặc score vào engine.

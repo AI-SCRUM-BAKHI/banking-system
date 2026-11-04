@@ -3,6 +3,7 @@ package com.scrumai.fraud.repository;
 import com.scrumai.fraud.service.RiskModels.Context;
 import com.scrumai.fraud.service.RiskModels.Coverage;
 import com.scrumai.fraud.service.RiskModels.Transfer;
+import com.scrumai.fraud.service.RiskScoreEngine;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -96,7 +97,7 @@ public class RiskEvaluationRepository {
         """,
             (rs, row) -> transfer(rs),
             account,
-            Timestamp.from(t.minusSeconds(601)),
+            Timestamp.from(t.minusSeconds(RiskScoreEngine.FLOW_CONTEXT_SECONDS + 1)),
             Timestamp.from(t.plusSeconds(1)));
     boolean unknown =
         jdbc

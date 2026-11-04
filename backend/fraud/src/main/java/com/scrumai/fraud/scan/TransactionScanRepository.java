@@ -6,6 +6,7 @@ import com.scrumai.fraud.service.RiskModels.Context;
 import com.scrumai.fraud.service.RiskModels.Coverage;
 import com.scrumai.fraud.service.RiskModels.Evaluation;
 import com.scrumai.fraud.service.RiskModels.Transfer;
+import com.scrumai.fraud.service.RiskScoreEngine;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -84,7 +85,7 @@ public class TransactionScanRepository {
             (rs, row) -> contextTransfer(rs),
             tx.fromAccountRef(),
             tx.transactionRef(),
-            Timestamp.from(t.minusSeconds(600)),
+            Timestamp.from(t.minusSeconds(RiskScoreEngine.FLOW_CONTEXT_SECONDS)),
             Timestamp.from(t),
             Timestamp.from(t));
     Boolean unknown =
