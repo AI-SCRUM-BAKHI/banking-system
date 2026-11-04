@@ -82,6 +82,13 @@ class AuthServiceTest {
       when(users.existsByUsername("new_user")).thenReturn(false);
       when(users.existsByEmailIgnoreCase("new_user@example.com")).thenReturn(false);
       when(passwordEncoder.encode("Password123!@#")).thenReturn("$2a$10$encodedPassword");
+      when(users.saveAndFlush(any(UserEntity.class)))
+          .thenAnswer(
+              invocation -> {
+                UserEntity savedUser = invocation.getArgument(0);
+                ReflectionTestUtils.setField(savedUser, "id", UUID.randomUUID());
+                return savedUser;
+              });
       mockJwtEncoding();
 
       RegisterRequest request =
