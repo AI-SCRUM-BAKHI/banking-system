@@ -1,0 +1,208 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+:root {
+    color-scheme: dark;
+    font-family: 'Roboto Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: #f4f6f1;
+    background: #1a1d1a;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    --canvas: #1a1d1a;
+    --surface: #222622;
+    --surface-raised: #292e29;
+    --surface-hover: #303730;
+    --line: #3a4139;
+    --line-strong: #505a4d;
+    --text: #f4f6f1;
+    --text-muted: #bdbdbd;
+    --text-dim: #858d82;
+    --green: #76b900;
+    --green-bright: #6efa5f;
+    --cyan: #00bfff;
+    --amber: #f0b84b;
+    --red: #fa7278;
+    --space-unit: 8px;
+}
+
+@theme inline {
+    --color-canvas: var(--canvas);
+    --color-panel: var(--surface);
+    --color-panel-raised: var(--surface-raised);
+    --color-panel-hover: var(--surface-hover);
+    --color-line: var(--line);
+    --color-line-strong: var(--line-strong);
+    --color-copy: var(--text);
+    --color-muted: var(--text-muted);
+    --color-dim: var(--text-dim);
+    --color-accent: var(--green);
+    --color-accent-bright: var(--green-bright);
+    --color-signal: var(--cyan);
+    --color-risk-medium: var(--amber);
+    --color-risk-critical: var(--red);
+    --font-sans: 'Roboto Mono', ui-monospace, monospace;
+    --font-mono: 'Roboto Mono', ui-monospace, monospace;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+    background: radial-gradient(ellipse at 75% -15%, rgb(118 185 0 / 9%), transparent 38%), var(--canvas);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+button,
+input,
+select {
+    font: inherit;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 2px solid var(--green-bright);
+    outline-offset: 3px;
+}
+
+.chart-grid-line {
+    stroke: #3b413a;
+    stroke-dasharray: 3 5;
+}
+
+.chart-axis-label,
+.graph-node-label,
+.graph-edge-label {
+    fill: var(--text-muted);
+    font-family: 'Roboto Mono', monospace;
+    font-size: 9px;
+}
+
+.chart-line-primary {
+    fill: none;
+    stroke: var(--green-bright);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2.5;
+}
+
+.chart-line-secondary {
+    fill: none;
+    stroke: var(--cyan);
+    stroke-dasharray: 5 5;
+    stroke-linecap: round;
+    stroke-width: 1.5;
+}
+
+.chart-area {
+    fill: url('#risk-area');
+}
+
+.chart-point {
+    fill: var(--canvas);
+    stroke: var(--green-bright);
+    stroke-width: 2;
+}
+
+.graph-edge {
+    fill: none;
+    stroke: var(--green);
+    stroke-width: 2;
+    marker-end: url('#edge-arrow');
+}
+
+.graph-edge.secondary {
+    stroke: var(--cyan);
+    stroke-dasharray: 5 4;
+}
+
+.graph-edge-label {
+    paint-order: stroke;
+    stroke: var(--canvas);
+    stroke-width: 4px;
+    stroke-linejoin: round;
+}
+
+.graph-node-halo {
+    fill: rgb(118 185 0 / 9%);
+    stroke: rgb(118 185 0 / 42%);
+}
+
+.graph-node-halo.alert {
+    fill: rgb(250 114 120 / 9%);
+    stroke: rgb(250 114 120 / 55%);
+}
+
+.graph-node-dot {
+    fill: var(--green-bright);
+}
+
+.graph-node-dot.alert {
+    fill: var(--red);
+}
+
+.graph-node-label {
+    text-anchor: middle;
+}
+
+.signal-pulse {
+    animation: signal-pulse 2.4s ease-in-out infinite;
+}
+
+.auth-shell {
+    --canvas: #f2f6f4;
+    --surface: #ffffff;
+    --surface-raised: #e9fcdc;
+    --surface-hover: #e1edd8;
+    --line: #d9e3d6;
+    --line-strong: #b6c7ad;
+    --text: #232f0f;
+    --text-muted: #46533e;
+    --text-dim: #64705b;
+    --green: #b9ff8d;
+    --green-bright: #35521f;
+    --cyan: #37645a;
+    --amber: #925d1d;
+    --red: #ad3f45;
+    --font-sans: 'Geist', 'Segoe UI', sans-serif;
+    --font-mono: 'IBM Plex Mono', 'Roboto Mono', monospace;
+    color-scheme: light;
+    background: radial-gradient(ellipse at 88% 8%, rgb(185 255 141 / 26%), transparent 28%), var(--canvas);
+    color: var(--text);
+}
+
+.auth-shell a,
+.auth-shell button {
+    -webkit-tap-highlight-color: transparent;
+}
+
+@keyframes signal-pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.45;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
