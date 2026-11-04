@@ -1,0 +1,50 @@
+name: Configure fraud scanner
+
+on:
+  workflow_dispatch:
+    inputs:
+      rule_version:
+        description: Rule profile to use for new evaluations
+        required: true
+        type: choice
+        options:
+          - rule-score-v3-recall
+          - rule-score-v2
+          - rule-score-v1
+      scan_enabled:
+        description: Enable the background scanner
+        required: true
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+permissions:
+  contents: read
+
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure and verify scanner on EC2
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          RULE_PROFILE: ${{ inputs.rule_version }}
+          SCAN_ENABLED: ${{ inputs.scan_enabled }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          envs: RULE_PROFILE,SCAN_ENABLED
+          script_stop: true
+          script: |
+            set -e
+            TARGET_DIR="${{ secrets.TARGET_DIR }}"
+            if [ -z "$TARGET_DIR" ]; then TARGET_DIR="$HOME/banking-system"; fi
+            cd "$TARGET_DIR"
+            git fetch origin main
+            git merge --ff-only origin/main
+            python3 infra/configure_fraud_scan.py --version "$RULE_PROFILE" --enabled "$SCAN_ENABLED"
+            bash infra/deploy.sh
+            docker inspect scrum-ai-backend --format '{{json .Config.Env}}' | python3 -c 'import json,sys; e=dict(x.split("=",1) for x in json.load(sys.stdin)); print(json.dumps({"ruleVersion":e.get("APP_FRAUD_RULE_VERSION"),"scanEnabled":e.get("APP_FRAUD_SCAN_ENABLED")}))'
