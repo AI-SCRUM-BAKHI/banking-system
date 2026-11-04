@@ -7,7 +7,7 @@ Monorepo for the banking fraud detection product: a Spring Boot backend and a Re
 ```text
 backend/       Java 21 + Spring Boot multi-module backend
 frontend/      React + TypeScript + Vite operations console
-infra/         Local infrastructure, currently PostgreSQL via Docker Compose
+infra/         Docker Compose for the frontend and backend
 .github/       Backend and frontend CI workflows
 docs/          Product and technical documentation (add as needed)
 ```
@@ -18,17 +18,27 @@ The backend keeps persistence entities in their owning Gradle modules:
 - `backend/fraud`: fraud transactions, rule hits, money-flow chain and repositories.
 - `backend/database`: shared JPA setup, datasource URL handling and Flyway migrations.
 
-The backend reads `backend/.env` when launched from that directory. Copy `.env.example` for local PostgreSQL. Database connection settings use one variable: `DATABASE_URL`, a PostgreSQL connection URI containing the username and password.
+The backend reads database and authentication settings from `backend/.env`. Set `DATABASE_URL` to the PostgreSQL connection URI for the existing database; Compose does not start a database container.
+
+## Run frontend and backend with Docker Compose
+
+Configure `backend/.env` with the database URL and required auth secrets, then run from the repository root:
+
+```powershell
+docker compose -f infra/docker-compose.yml up --build
+```
+
+Open the frontend at http://localhost:5173. The backend API is at http://localhost:8080 and Swagger is at http://localhost:8080/swagger-ui.html. Stop both containers with `Ctrl+C`, or run `docker compose -f infra/docker-compose.yml down` in another terminal.
+
+The frontend API URL is compiled into the static bundle during image build. To use a different API host, set `VITE_API_BASE_URL` in the shell before running Compose and rebuild the image.
 
 ## Run locally
 
 ### Backend
 
-Prerequisites: JDK 21 and Docker Desktop.
+Prerequisites: JDK 21.
 
 ```powershell
-Copy-Item backend/.env.example backend/.env
-docker compose -f infra/docker-compose.yml up -d postgres
 Push-Location backend
 .\gradlew.bat :app-bootstrap:bootRun
 Pop-Location
