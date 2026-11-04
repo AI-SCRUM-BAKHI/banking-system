@@ -116,6 +116,7 @@ public class SecurityConfig {
                 auth.requestMatchers(
                         "/api/v1/auth/login",
                         "/api/v1/auth/refresh",
+                        "/api/v1/auth/logout",
                         "/api/v1/system/ping",
                         "/actuator/health/**",
                         "/v3/api-docs/**",
@@ -129,8 +130,7 @@ public class SecurityConfig {
                     .hasAnyRole("ADMIN", "BANK_USER")
                     .requestMatchers("/api/v1/users/**")
                     .hasRole("ADMIN")
-                    .requestMatchers(
-                        "/api/v1/fraud-transactions/**", "/api/v1/auth/me", "/api/v1/auth/logout")
+                    .requestMatchers("/api/v1/fraud-transactions/**", "/api/v1/auth/me")
                     .hasAnyRole("ADMIN", "BANK_USER")
                     .anyRequest()
                     .denyAll())

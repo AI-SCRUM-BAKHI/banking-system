@@ -38,12 +38,24 @@ public class AuthController {
   @PostMapping("/logout")
   public ApiResponse<Map<String, Boolean>> logout(
       @Valid @RequestBody RefreshRequest request, Authentication authentication) {
-    auth.logout(request.refreshToken(), UUID.fromString(authentication.getName()));
+    UUID userId =
+        (authentication != null && authentication.getName() != null)
+            ? parseUuid(authentication.getName())
+            : null;
+    auth.logout(request.refreshToken(), userId);
     return ApiResponse.success(Map.of("loggedOut", true));
   }
 
   @GetMapping("/me")
   public ApiResponse<CurrentUserResponse> me(Authentication authentication) {
     return ApiResponse.success(auth.me(UUID.fromString(authentication.getName())));
+  }
+
+  private static UUID parseUuid(String value) {
+    try {
+      return UUID.fromString(value);
+    } catch (IllegalArgumentException exception) {
+      return null;
+    }
   }
 }

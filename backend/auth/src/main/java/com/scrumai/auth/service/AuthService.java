@@ -86,7 +86,8 @@ public class AuthService {
         .findForUpdate(hash(suppliedToken))
         .ifPresent(
             token -> {
-              if (token.getUser().getId().equals(userId) && token.getRevokedAt() == null) {
+              if ((userId == null || token.getUser().getId().equals(userId))
+                  && token.getRevokedAt() == null) {
                 token.setRevokedAt(Instant.now());
               }
             });

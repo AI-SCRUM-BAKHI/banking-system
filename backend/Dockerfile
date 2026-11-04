@@ -1,7 +1,7 @@
 FROM gradle:8.14.3-jdk21 AS build
 WORKDIR /workspace
 COPY . .
-RUN chmod +x gradlew && ./gradlew :app-bootstrap:bootJar --no-daemon
+RUN gradle :app-bootstrap:bootJar --no-daemon
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app
