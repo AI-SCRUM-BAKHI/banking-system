@@ -17,12 +17,12 @@
     border-radius: 10px;
 }
 .api-intro b {
-    font-size: 12px;
+    font-size: 1rem;
     font-weight: 500;
     color: #6583ab;
 }
 .api-intro p {
-    font-size: 9px;
+    font-size: 0.8125rem;
     line-height: 1.9;
     color: #7b95b8;
     margin-top: 7px;
@@ -31,7 +31,7 @@
 .api-intro > .pill {
     margin-left: auto;
     font:
-        7px 'IBM Plex Mono',
+        0.75rem 'IBM Plex Mono',
         monospace;
     letter-spacing: 1px;
 }
@@ -47,7 +47,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 10px;
+    font-size: 0.875rem;
     padding: 0 0 14px;
     background: none;
     border-bottom: 2px solid transparent;
@@ -59,7 +59,7 @@
 }
 .page-tabs a {
     margin-left: auto;
-    font-size: 9px;
+    font-size: 0.8125rem;
 }
 .endpoint-bar {
     display: flex;
@@ -73,7 +73,7 @@
 }
 .http-method {
     font:
-        500 9px 'IBM Plex Mono',
+        500 0.8125rem 'IBM Plex Mono',
         monospace;
     color: #689b84;
     padding: 4px 7px;
@@ -92,7 +92,7 @@
     border-color: #eee6d3;
 }
 .endpoint-bar code {
-    font-size: 10px;
+    font-size: 0.875rem;
     color: #6a88b0;
     overflow-wrap: anywhere;
     word-break: break-word;
@@ -112,7 +112,7 @@
 }
 .request-controls label {
     display: block;
-    font-size: 9px;
+    font-size: 0.8125rem;
     color: #7692b7;
     margin-bottom: 14px;
 }
@@ -127,12 +127,12 @@
     border-radius: 6px;
     padding: 10px 12px;
     margin-top: 9px;
-    font-size: 10px;
+    font-size: 0.875rem;
     background: #fcfdff;
     min-height: 38px;
 }
 .request-controls p {
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #8ba5c8;
     margin: 12px 0 17px;
 }
@@ -143,7 +143,7 @@
     border-block: 1px solid #e4ebf5;
     padding: 12px 23px;
     font:
-        7px 'IBM Plex Mono',
+        0.75rem 'IBM Plex Mono',
         monospace;
     letter-spacing: 1px;
     color: #7895bb;
@@ -158,7 +158,7 @@
     background: #f8faff;
     padding: 22px 23px;
     font:
-        11px/1.9 'IBM Plex Mono',
+        0.9375rem/1.9 'IBM Plex Mono',
         monospace;
     color: #6c89af;
     outline-offset: -4px;
@@ -175,20 +175,20 @@
     display: flex;
     gap: 5px;
     align-items: center;
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #819cbe;
 }
 .api-response .panel-head {
     border-bottom: 1px solid #e8eef6;
 }
 .api-response .pill {
-    font-size: 7px;
+    font-size: 0.75rem;
     white-space: normal;
     text-align: right;
 }
 .api-response pre {
     padding: 23px;
-    font-size: 10px;
+    font-size: 0.875rem;
     color: #6483aa;
     line-height: 1.9;
     max-height: 570px;
@@ -218,28 +218,28 @@
     margin-bottom: 24px;
 }
 .response-placeholder h3 {
-    font-size: 14px;
+    font-size: 1.125rem;
     font-weight: 500;
     color: #839ec2;
 }
 .response-placeholder p {
-    font-size: 10px;
+    font-size: 0.875rem;
     color: #96adc9;
     margin: 12px 0 25px;
 }
 .response-placeholder > span {
     font:
-        7px 'IBM Plex Mono',
+        0.75rem 'IBM Plex Mono',
         monospace;
     letter-spacing: 1.3px;
     color: #9cb3d0;
 }
 .api-contract-table td {
-    font-size: 9px;
+    font-size: 0.8125rem;
     color: #7d98ba;
 }
 .api-contract-table td.mono {
-    font-size: 9px;
+    font-size: 0.8125rem;
     color: #7997be;
 }
 .api-bottom-notes {
@@ -249,12 +249,12 @@
     margin: 26px 4px 0;
 }
 .api-bottom-notes h3 {
-    font-size: 11px;
+    font-size: 0.9375rem;
     color: #7e97b8;
     font-weight: 500;
 }
 .api-bottom-notes p {
-    font-size: 9px;
+    font-size: 0.8125rem;
     color: #859fbf;
     line-height: 1.9;
     margin-top: 11px;
@@ -273,11 +273,11 @@
     background: #f9fbfe;
     border-block: 1px solid #eaf0f7;
     color: #7d9ac0;
-    font-size: 8px;
+    font-size: 0.75rem;
     line-height: 1.9;
 }
 .producer-flow b {
-    font-size: 7px;
+    font-size: 0.75rem;
     color: #8ba6c9;
     font-weight: 400;
 }
@@ -289,7 +289,7 @@
     align-items: center;
     padding: 12px 20px;
     font:
-        7px 'IBM Plex Mono',
+        0.75rem 'IBM Plex Mono',
         monospace;
     letter-spacing: 1px;
 }
@@ -300,20 +300,20 @@
     background: #18314e;
     padding: 23px;
     color: #b4cbe8;
-    font-size: 10px;
+    font-size: 0.875rem;
     line-height: 2;
 }
 .api-explanation {
     padding: 24px;
 }
 .api-explanation h3 {
-    font-size: 12px;
+    font-size: 1rem;
     color: #829cbd;
     font-weight: 500;
 }
 .api-explanation ul {
     padding-left: 16px;
-    font-size: 10px;
+    font-size: 0.875rem;
     color: #849fc3;
     line-height: 2.2;
     margin: 15px 0 0;
@@ -321,7 +321,7 @@
 }
 .ingest-json {
     padding: 23px;
-    font-size: 10px;
+    font-size: 0.875rem;
     line-height: 1.9;
     color: #7896bc;
     max-height: 600px;
@@ -335,13 +335,13 @@
 }
 .member-cell b {
     display: block;
-    font-size: 10px;
+    font-size: 0.875rem;
     color: #7593b9;
     font-weight: 500;
 }
 .member-cell small {
     display: block;
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #8aa5c7;
     margin-top: 6px;
 }
@@ -363,7 +363,7 @@
     background: none;
     border-radius: 4px;
     padding: 6px 10px;
-    font-size: 9px;
+    font-size: 0.8125rem;
     color: #8a9db8;
 }
 .evaluation-editor-tabs button.active {
@@ -390,11 +390,11 @@
 }
 .evaluation-form input {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
+    font-size: 0.875rem;
 }
 .evaluation-form-help {
     display: block;
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #8a9db7;
     line-height: 1.9;
 }
@@ -408,14 +408,14 @@
     margin-top: 21px;
 }
 .evaluation-actions .btn {
-    font-size: 11px;
+    font-size: 0.9375rem;
     padding: 11px 16px;
 }
 .evaluation-auth-note {
     display: flex;
     align-items: flex-start;
     gap: 7px;
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #869fbe;
     line-height: 1.8;
     margin-top: 18px;
@@ -425,7 +425,7 @@
 }
 .evaluation-json-editor {
     min-height: 420px;
-    font-size: 10px;
+    font-size: 0.875rem;
     border: 1px solid #e3eaf5;
     border-radius: 7px;
 }
@@ -450,17 +450,17 @@
 }
 .evaluation-verdict span {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 8px;
+    font-size: 0.75rem;
     letter-spacing: 1px;
 }
 .evaluation-verdict h3 {
-    font-size: 17px;
+    font-size: 1.1875rem;
     font-weight: 500;
     color: inherit;
     margin-top: 7px;
 }
 .evaluation-verdict p {
-    font-size: 8px;
+    font-size: 0.75rem;
     margin-top: 9px;
     overflow-wrap: anywhere;
 }
@@ -476,7 +476,7 @@
 }
 .evaluation-result-metrics > div > span {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 7px;
+    font-size: 0.75rem;
     color: #90a6c5;
     letter-spacing: 1px;
 }
@@ -495,7 +495,7 @@
     padding-top: 8px;
 }
 .evaluation-result-metrics strong small {
-    font-size: 13px;
+    font-size: 1.0625rem;
     letter-spacing: 0;
     color: #a5b6ce;
 }
@@ -515,7 +515,7 @@
 }
 .evaluation-score-scale > span {
     display: block;
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #8aa1c0;
     margin-top: 11px;
     line-height: 1.8;
@@ -530,7 +530,7 @@
     color: #b29c72;
 }
 .evaluation-partial p {
-    font-size: 9px;
+    font-size: 0.8125rem;
     line-height: 1.9;
 }
 .evaluation-partial svg {
@@ -540,7 +540,7 @@
     padding: 23px;
 }
 .evaluation-rule-results h3 {
-    font-size: 12px;
+    font-size: 1rem;
     font-weight: 500;
     color: #728fb5;
     display: flex;
@@ -552,7 +552,7 @@
     background: #f1f5fc;
     border-radius: 4px;
     padding: 3px 6px;
-    font-size: 9px;
+    font-size: 0.8125rem;
 }
 .evaluation-rule-results > article {
     display: flex;
@@ -563,24 +563,24 @@
     padding: 17px 0;
 }
 .evaluation-rule-results b {
-    font-size: 10px;
+    font-size: 0.875rem;
     font-weight: 500;
     color: #7d98ba;
 }
 .evaluation-rule-results code {
     display: block;
-    font-size: 7px;
+    font-size: 0.75rem;
     color: #98adca;
     margin-top: 8px;
 }
 .evaluation-rule-results small {
     display: block;
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #9bacbf;
     margin-top: 8px;
 }
 .evaluation-rule-results > p {
-    font-size: 10px;
+    font-size: 0.875rem;
     color: #90a7c3;
     line-height: 1.9;
 }
@@ -591,7 +591,7 @@
     padding: 13px;
 }
 .evaluation-rule-results summary {
-    font-size: 10px;
+    font-size: 0.875rem;
     cursor: pointer;
     color: #7d97b9;
 }
@@ -602,10 +602,10 @@
 }
 .unevaluated-rule b {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 8px;
+    font-size: 0.75rem;
 }
 .unevaluated-rule p {
-    font-size: 9px;
+    font-size: 0.8125rem;
     color: #96aac4;
     margin-top: 6px;
     line-height: 1.9;
@@ -619,12 +619,12 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 10px;
+    font-size: 0.875rem;
     color: #7898c2;
     cursor: pointer;
 }
 .evaluation-raw .text-button {
-    font-size: 8px;
+    font-size: 0.75rem;
     margin-top: 20px;
 }
 .evaluation-raw pre {
@@ -632,7 +632,7 @@
     padding: 15px;
     border-radius: 6px;
     margin-top: 12px;
-    font-size: 9px;
+    font-size: 0.8125rem;
     color: #6485b1;
     line-height: 1.9;
     max-height: 340px;
@@ -645,11 +645,11 @@
     gap: 9px;
     align-items: center;
     flex-wrap: wrap;
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #9aafcb;
 }
 .evaluation-request-id code {
-    font-size: 8px;
+    font-size: 0.75rem;
 }
 .evaluation-rules-grid {
     display: grid;
@@ -672,23 +672,23 @@
     gap: 10px;
 }
 .evaluation-rules-grid code {
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #8da5c7;
 }
 .evaluation-rules-grid h3 {
-    font-size: 12px;
+    font-size: 1rem;
     font-weight: 500;
     color: #708fb7;
     margin: 13px 0 10px;
 }
 .evaluation-rules-grid p {
-    font-size: 10px;
+    font-size: 0.875rem;
     color: #91a6c1;
     line-height: 1.9;
 }
 .evaluation-form .form-error small {
     display: block;
-    font-size: 9px;
+    font-size: 0.8125rem;
     line-height: 1.9;
     margin-top: 10px;
 }
@@ -710,7 +710,7 @@
         gap: 12px;
     }
     .evaluation-verdict h3 {
-        font-size: 16px;
+        font-size: 1.125rem;
     }
     .evaluation-rules-grid {
         grid-template-columns: 1fr;

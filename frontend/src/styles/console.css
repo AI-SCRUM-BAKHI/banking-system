@@ -48,12 +48,12 @@
 }
 .workspace-selector b {
     display: block;
-    font-size: 10px;
+    font-size: 0.875rem;
     color: #c3d2e6;
 }
 .workspace-selector small {
     display: block;
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #7893b3;
     margin-top: 6px;
 }
@@ -63,7 +63,7 @@
 }
 .sidebar-label {
     font:
-        7px 'IBM Plex Mono',
+        0.75rem 'IBM Plex Mono',
         monospace;
     letter-spacing: 1.3px;
     color: #7890af;
@@ -78,7 +78,7 @@
     display: flex;
     align-items: center;
     gap: 11px;
-    font-size: 10px;
+    font-size: 0.875rem;
     border: 1px solid transparent;
     border-radius: 6px;
     padding: 12px 10px;
@@ -110,7 +110,7 @@
 }
 .tiny-label {
     font:
-        6px 'IBM Plex Mono',
+        0.6875rem 'IBM Plex Mono',
         monospace;
     letter-spacing: 0.3px;
     padding: 3px 4px;
@@ -145,12 +145,12 @@
 }
 .sidebar-help b {
     display: block;
-    font-size: 9px;
+    font-size: 0.8125rem;
     color: #a8bedc;
     font-weight: 500;
 }
 .sidebar-help p {
-    font-size: 9px;
+    font-size: 0.8125rem;
     color: #7c98bb;
     line-height: 1.9;
     margin: 10px 0 13px;
@@ -160,14 +160,14 @@
     align-items: center;
     justify-content: space-between;
     color: #93b1d9;
-    font-size: 9px;
+    font-size: 0.8125rem;
 }
 .environment {
     display: flex;
     align-items: center;
     gap: 7px;
     font:
-        6px 'IBM Plex Mono',
+        0.6875rem 'IBM Plex Mono',
         monospace;
     letter-spacing: 1px;
     color: #8ba7c9;
@@ -199,7 +199,7 @@
     color: #b2c8e5;
 }
 .sidebar-user b {
-    font-size: 9px;
+    font-size: 0.8125rem;
     display: block;
     color: #bdcde3;
     max-width: 120px;
@@ -209,7 +209,7 @@
     font-weight: 500;
 }
 .sidebar-user small {
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #8ba2c0;
     display: block;
     margin-top: 6px;
@@ -242,7 +242,7 @@
     display: flex;
     gap: 14px;
     align-items: center;
-    font-size: 10px;
+    font-size: 0.875rem;
     color: #7f8fa5;
     white-space: nowrap;
 }
@@ -262,7 +262,7 @@
     display: flex;
     align-items: center;
     gap: 9px;
-    font-size: 9px;
+    font-size: 0.8125rem;
     color: #8b9eb8;
 }
 .header-search kbd {
@@ -271,7 +271,7 @@
     border-radius: 4px;
     width: 20px;
     text-align: center;
-    font-size: 12px;
+    font-size: 1rem;
     color: #b8c1ce;
     background: #fcfdff;
 }
@@ -282,7 +282,7 @@
     margin: 0 4px;
 }
 .header-right > .pill {
-    font-size: 8px;
+    font-size: 0.75rem;
     background: none;
     border: 0;
 }
@@ -306,7 +306,7 @@
     margin-bottom: 27px;
 }
 .page-title .eyebrow {
-    font-size: 7px;
+    font-size: 0.75rem;
     letter-spacing: 1.4px;
     color: #8194ac;
     margin-bottom: 12px;
@@ -321,7 +321,7 @@
     color: #719ae0;
 }
 .page-title p {
-    font-size: 10px;
+    font-size: 0.875rem;
     color: #8496b0;
     margin-top: 7px;
 }
@@ -331,11 +331,11 @@
     align-items: center;
 }
 .page-actions > select {
-    font-size: 9px;
+    font-size: 0.8125rem;
     min-height: 35px;
 }
 .page-actions .btn {
-    font-size: 9px;
+    font-size: 0.8125rem;
 }
 .refresh-button {
     border: 1px solid #e2e8f0;
@@ -368,7 +368,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 10px;
+    font-size: 0.875rem;
     color: #778ba7;
     gap: 8px;
 }
@@ -436,7 +436,7 @@
     display: flex;
     gap: 6px;
     align-items: center;
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #899cb6;
 }
 .stat-note i {
@@ -467,20 +467,20 @@
     gap: 15px;
 }
 .panel-head h2 {
-    font-size: 12px;
+    font-size: 1rem;
     font-weight: 600;
     letter-spacing: -0.1px;
     color: #3e5574;
 }
 .panel-head p {
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #859ab7;
     margin-top: 7px;
 }
 .panel-ellipsis {
     letter-spacing: 2px;
     color: #a9b4c4;
-    font-size: 17px;
+    font-size: 1.1875rem;
 }
 .dashboard-main-grid {
     display: grid;
@@ -492,7 +492,7 @@
     display: flex;
     align-items: center;
     gap: 13px;
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #8c9cb0;
     white-space: nowrap;
 }
@@ -523,7 +523,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 7px;
+    font-size: 0.75rem;
     padding: 12px 23px;
     border-top: 1px solid #edf1f7;
     color: #899fbe;
@@ -575,7 +575,7 @@
 }
 .review-donut > div > span {
     font:
-        6px 'IBM Plex Mono',
+        0.6875rem 'IBM Plex Mono',
         monospace;
     color: #9eacbf;
     letter-spacing: 1.7px;
@@ -591,7 +591,7 @@
     display: flex;
     gap: 6px;
     align-items: center;
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #8195b1;
 }
 .donut-legend > div > span:first-child {
@@ -603,7 +603,7 @@
 .donut-legend b {
     color: #657d9c;
     font:
-        500 9px 'IBM Plex Mono',
+        500 0.8125rem 'IBM Plex Mono',
         monospace;
     margin-left: auto;
     padding-left: 13px;
@@ -616,7 +616,7 @@
 .review-progress > div:first-child {
     display: flex;
     justify-content: space-between;
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #869dbb;
     margin-bottom: 13px;
 }
@@ -652,7 +652,7 @@
 .risk-distribution > div > div:first-child {
     display: flex;
     justify-content: space-between;
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #8ca1bd;
     margin-bottom: 8px;
 }
@@ -699,28 +699,28 @@
 }
 .callout-content .pill {
     font:
-        6px 'IBM Plex Mono',
+        0.6875rem 'IBM Plex Mono',
         monospace;
     letter-spacing: 0.8px;
     padding: 6px 7px;
 }
 .callout-content h2 {
     color: #d3e2f7;
-    font-size: 20px;
+    font-size: 1.375rem;
     font-weight: 500;
     letter-spacing: -0.4px;
     line-height: 1.5;
     margin: 15px 0 10px;
 }
 .callout-content p {
-    font-size: 9px;
+    font-size: 0.8125rem;
     color: #8da9cc;
 }
 .callout-content button {
     display: flex;
     align-items: center;
     gap: 30px;
-    font-size: 9px;
+    font-size: 0.8125rem;
     margin-top: 19px;
     color: #9fc0ef;
     background: none;
@@ -772,7 +772,7 @@ table {
 }
 th {
     font:
-        6px 'IBM Plex Mono',
+        0.6875rem 'IBM Plex Mono',
         monospace;
     letter-spacing: 0.8px;
     color: #7e95b2;
@@ -784,7 +784,7 @@ th {
 td {
     padding: 16px 23px;
     border-bottom: 1px solid #edf1f7;
-    font-size: 10px;
+    font-size: 0.875rem;
     color: #73869f;
 }
 tbody tr:last-child td {
@@ -799,7 +799,7 @@ tbody tr:hover {
 .table-ref {
     display: block;
     font:
-        500 10px 'IBM Plex Mono',
+        500 0.875rem 'IBM Plex Mono',
         monospace;
     background: none;
     padding: 0;
@@ -812,7 +812,7 @@ tbody tr:hover {
 .table-ref + small {
     display: block;
     color: #849bb9;
-    font-size: 8px;
+    font-size: 0.75rem;
     margin-top: 6px;
 }
 .table-accounts {
@@ -820,7 +820,7 @@ tbody tr:hover {
     gap: 7px;
     align-items: center;
     font:
-        9px 'IBM Plex Mono',
+        0.8125rem 'IBM Plex Mono',
         monospace;
     color: #7a91b0;
 }
@@ -829,7 +829,7 @@ tbody tr:hover {
 }
 .table-amount {
     font:
-        500 10px 'Manrope',
+        500 0.875rem 'Manrope',
         sans-serif;
     color: #55718f;
 }
@@ -839,11 +839,11 @@ tbody tr:hover {
     align-items: center;
 }
 .table-risk > .mono {
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #7f99ba;
 }
 .table-scroll .pill {
-    font-size: 8px;
+    font-size: 0.75rem;
 }
 .row-arrow {
     padding: 4px;
@@ -856,7 +856,7 @@ tbody tr:hover {
     display: flex;
     justify-content: space-between;
     gap: 12px;
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #839bb9;
     margin-top: 17px;
 }
@@ -878,7 +878,7 @@ tbody tr:hover {
     padding-top: 18px;
     border-top: 1px solid #e1e7f0;
     color: #8a9fba;
-    font-size: 7px;
+    font-size: 0.75rem;
 }
 .console-footer > span {
     display: flex;
@@ -904,12 +904,12 @@ tbody tr:hover {
     justify-content: center;
 }
 .state-box h3 {
-    font-size: 16px;
+    font-size: 1.125rem;
     font-weight: 500;
     color: #607c9d;
 }
 .state-box p {
-    font-size: 11px;
+    font-size: 0.9375rem;
     max-width: 440px;
     color: #7d94b3;
 }

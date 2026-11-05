@@ -19,7 +19,7 @@
     border: 0;
     outline: none !important;
     background: transparent;
-    font-size: 10px;
+    font-size: 0.875rem;
     width: 100%;
     min-width: 0;
     padding: 0;
@@ -37,10 +37,10 @@
     min-height: 16px;
 }
 .filters-bar select {
-    font-size: 9px;
+    font-size: 0.8125rem;
 }
 .filters-bar .btn {
-    font-size: 9px;
+    font-size: 0.8125rem;
 }
 .filters-bar .pressed {
     background: #edf3ff;
@@ -56,7 +56,7 @@
     background: #fcfdff;
 }
 .expanded-filters label {
-    font-size: 9px;
+    font-size: 0.8125rem;
     color: #7890af;
     flex: 1;
     max-width: 210px;
@@ -65,7 +65,7 @@
 .expanded-filters select {
     display: block;
     width: 100%;
-    font-size: 10px;
+    font-size: 0.875rem;
     border: 1px solid #dfe6ef;
     border-radius: 6px;
     background: #fff;
@@ -74,14 +74,14 @@
 }
 .expanded-filters > .text-button {
     margin-bottom: 12px;
-    font-size: 9px;
+    font-size: 0.8125rem;
 }
 .results-meta {
     padding: 13px 23px;
     border-top: 1px solid #edf1f7;
     display: flex;
     justify-content: space-between;
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #839cbb;
 }
 .results-meta > span:first-child {
@@ -95,7 +95,7 @@
     justify-content: space-between;
     padding: 15px 22px;
     border-top: 1px solid #e8eef5;
-    font-size: 9px;
+    font-size: 0.8125rem;
     color: #819aba;
 }
 .pagination > div {
@@ -115,7 +115,7 @@
 .pagination b {
     font-weight: 400;
     font:
-        9px 'IBM Plex Mono',
+        0.8125rem 'IBM Plex Mono',
         monospace;
     color: #6e89ad;
 }
@@ -134,7 +134,7 @@
     margin-bottom: 22px;
 }
 .info-banner p {
-    font-size: 10px;
+    font-size: 0.875rem;
     color: #6f8db7;
     line-height: 1.9;
 }
@@ -190,12 +190,12 @@
 }
 .case-picker-list b {
     font:
-        500 9px 'IBM Plex Mono',
+        500 0.8125rem 'IBM Plex Mono',
         monospace;
     color: #6480a7;
 }
 .case-picker-list .mono {
-    font-size: 10px;
+    font-size: 0.875rem;
     color: #87a2c7;
 }
 .case-picker-list p {
@@ -203,13 +203,13 @@
     align-items: center;
     gap: 8px;
     font:
-        9px 'IBM Plex Mono',
+        0.8125rem 'IBM Plex Mono',
         monospace;
     margin: 11px 0 13px;
     color: #7892b5;
 }
 .case-picker-list small {
-    font-size: 7px;
+    font-size: 0.75rem;
     color: #8fa7c7;
 }
 .case-risk-dot {
@@ -235,7 +235,7 @@
     align-items: center;
     gap: 20px;
     padding: 18px 22px 0;
-    font-size: 9px;
+    font-size: 0.8125rem;
     color: #819bbd;
 }
 .graph-stats > span:first-child {
@@ -287,7 +287,7 @@
     justify-content: center;
     align-items: center;
     gap: 20px;
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #839cbe;
     padding: 12px 18px 20px;
 }
@@ -322,20 +322,20 @@
 }
 .selected-account small {
     font:
-        6px 'IBM Plex Mono',
+        0.6875rem 'IBM Plex Mono',
         monospace;
     color: #8da5c7;
     letter-spacing: 1px;
 }
 .selected-account h3 {
     font:
-        500 16px 'IBM Plex Mono',
+        500 1.125rem 'IBM Plex Mono',
         monospace;
     margin-top: 7px;
     color: #5c7ca6;
 }
 .selected-account p {
-    font-size: 9px;
+    font-size: 0.8125rem;
     color: #829cbe;
     margin-top: 7px;
 }
@@ -349,7 +349,7 @@
     gap: 8px;
     padding: 23px;
     color: #8aa4c7;
-    font-size: 9px;
+    font-size: 0.8125rem;
     border-top: 1px solid #edf1f7;
     background: #fafcff;
 }
@@ -363,7 +363,7 @@
     gap: 20px;
     padding: 17px 0;
     border-bottom: 1px solid #e9eff7;
-    font-size: 10px;
+    font-size: 0.875rem;
     color: #7f99bb;
 }
 .chain-list > div:last-child {
@@ -371,13 +371,13 @@
 }
 .chain-list small {
     display: block;
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #91a9c9;
     margin-top: 6px;
 }
 .chain-list b {
     font-weight: 500;
-    font-size: 10px;
+    font-size: 0.875rem;
     color: #6483aa;
 }
 .subtle-note {
@@ -385,7 +385,7 @@
     align-items: center;
     gap: 9px;
     margin-top: 20px;
-    font-size: 9px;
+    font-size: 0.8125rem;
     color: #859fbe;
 }
 .ip-summary-grid {
@@ -423,7 +423,7 @@
     line-height: 1;
 }
 .ip-summary-grid span {
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #88a0c0;
 }
 .ip-workspace {
@@ -472,7 +472,7 @@
     color: #8ba7d1;
 }
 .ip-group-list b {
-    font-size: 11px;
+    font-size: 0.9375rem;
     color: #6b89b2;
     font-weight: 500;
 }
@@ -481,7 +481,7 @@
     color: #a2b7d2;
 }
 .ip-group-list p {
-    font-size: 9px;
+    font-size: 0.8125rem;
     color: #8ca4c3;
     margin: 12px 0;
 }
@@ -489,7 +489,7 @@
     display: flex;
     justify-content: space-between;
     gap: 8px;
-    font-size: 7px;
+    font-size: 0.75rem;
     color: #859ebf;
 }
 .ip-metrics > span:first-child {
@@ -545,7 +545,7 @@
 }
 .ip-constellation text {
     font:
-        8px 'IBM Plex Mono',
+        0.75rem 'IBM Plex Mono',
         monospace;
     fill: #8da6c8;
 }
@@ -570,12 +570,12 @@
     gap: 8px;
 }
 .ip-center .mono {
-    font-size: 10px;
+    font-size: 0.875rem;
     color: #d1dff1;
 }
 .ip-center small {
     font:
-        5px 'IBM Plex Mono',
+        0.6875rem 'IBM Plex Mono',
         monospace;
     letter-spacing: 1px;
     color: #7a99c3;
@@ -585,7 +585,7 @@
     bottom: 12px;
     width: 100%;
     text-align: center;
-    font-size: 7px;
+    font-size: 0.75rem;
     color: #93aac8;
 }
 .ip-selected-stats {
@@ -605,13 +605,13 @@
 .ip-selected-stats strong {
     display: block;
     font:
-        500 21px 'Manrope',
+        500 1.4375rem 'Manrope',
         sans-serif;
     color: #6484ad;
 }
 .ip-selected-stats span {
     display: block;
-    font-size: 7px;
+    font-size: 0.75rem;
     color: #89a2c3;
     margin-top: 8px;
 }
@@ -621,21 +621,21 @@
     gap: 8px;
     padding: 19px 21px;
     color: #8ca3c1;
-    font-size: 8px;
+    font-size: 0.75rem;
 }
 .ip-text {
-    font-size: 9px;
+    font-size: 0.8125rem;
     color: #6e8db7;
 }
 
 .ip-group-list p.ip-source-label {
     color: #b45309;
-    font-size: 12px;
+    font-size: 1rem;
     font-weight: 700;
     margin-top: 8px;
 }
 .ip-engine-note {
     margin: 16px 22px 0;
     color: #52637d;
-    font-size: 12px;
+    font-size: 1rem;
 }

@@ -20,7 +20,7 @@
 }
 .login-story-copy .pill {
     font:
-        7px 'IBM Plex Mono',
+        0.75rem 'IBM Plex Mono',
         monospace;
     letter-spacing: 1px;
     padding: 8px;
@@ -37,7 +37,7 @@
     color: #8baadc;
 }
 .login-story-copy p {
-    font-size: 11px;
+    font-size: 0.9375rem;
     color: #8aa5c7;
     line-height: 2;
 }
@@ -60,7 +60,7 @@
     align-items: center;
     gap: 10px;
     color: #91aed2;
-    font-size: 9px;
+    font-size: 0.8125rem;
     margin-top: auto;
     padding-top: 20px;
     border-top: 1px solid #7490b325;
@@ -68,7 +68,7 @@
 .login-story-bottom span:last-child {
     margin-left: auto;
     font:
-        7px 'IBM Plex Mono',
+        0.75rem 'IBM Plex Mono',
         monospace;
     letter-spacing: 1px;
     color: #7c97b8;
@@ -84,7 +84,7 @@
     align-items: center;
     gap: 9px;
     color: #8394aa;
-    font-size: 10px;
+    font-size: 0.875rem;
 }
 .login-form-wrap {
     max-width: 365px;
@@ -94,7 +94,7 @@
     padding: 55px 0;
 }
 .login-form-wrap > .eyebrow {
-    font-size: 8px;
+    font-size: 0.75rem;
     letter-spacing: 1.3px;
     color: #7796c0;
     margin-bottom: 18px;
@@ -106,13 +106,13 @@
     margin-bottom: 13px;
 }
 .login-form-wrap > p {
-    font-size: 10px;
+    font-size: 0.875rem;
     color: #8193aa;
     margin-bottom: 35px;
 }
 form label {
     display: block;
-    font-size: 10px;
+    font-size: 0.875rem;
     color: #5d6e82;
     font-weight: 500;
     margin-bottom: 20px;
@@ -125,7 +125,7 @@ form select {
     border-radius: 6px;
     background: #fbfcfe;
     padding: 12px 13px;
-    font-size: 11px;
+    font-size: 0.9375rem;
     margin-top: 9px;
     min-height: 43px;
 }
@@ -147,7 +147,7 @@ form input:focus {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #8d9eb4;
     margin: -2px 0 26px;
 }
@@ -157,7 +157,7 @@ form input:focus {
     gap: 5px;
 }
 .login-form-wrap .btn {
-    font-size: 11px;
+    font-size: 0.9375rem;
     min-height: 45px;
 }
 .form-error {
@@ -166,7 +166,7 @@ form input:focus {
     border: 1px solid #f3dbd5;
     border-radius: 6px;
     color: #b96b5b;
-    font-size: 11px;
+    font-size: 0.9375rem;
     line-height: 1.8;
     margin: 12px 0;
 }
@@ -174,7 +174,7 @@ form input:focus {
     display: flex;
     gap: 15px;
     align-items: center;
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #91a1b7;
     margin: 25px 0;
 }
@@ -185,7 +185,7 @@ form input:focus {
 }
 .login-demo-note {
     text-align: center;
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #8398b3;
     margin-top: 13px;
 }
@@ -194,26 +194,26 @@ form input:focus {
     padding-top: 26px;
     margin-top: 26px;
     border-top: 1px solid #edf0f5;
-    font-size: 10px;
+    font-size: 0.875rem;
     color: #8297b1;
 }
 .login-register button {
     display: inline-flex;
     gap: 4px;
     align-items: center;
-    font-size: 10px;
+    font-size: 0.875rem;
     color: var(--blue);
     background: none;
     padding: 0 3px;
 }
 .login-form-footer {
-    font-size: 9px;
+    font-size: 0.8125rem;
     text-align: center;
     color: #95a8c0;
     margin-top: 40px;
 }
 .login-copyright {
-    font-size: 8px;
+    font-size: 0.75rem;
     text-align: center;
     color: #94a5bb;
 }
@@ -228,11 +228,11 @@ form input:focus {
     margin-bottom: 16px;
 }
 .registration-info h3 {
-    font-size: 15px;
+    font-size: 1.125rem;
     font-weight: 600;
 }
 .registration-info p {
-    font-size: 11px;
+    font-size: 0.9375rem;
     color: #8a9bb0;
     margin: 13px 0 23px;
 }

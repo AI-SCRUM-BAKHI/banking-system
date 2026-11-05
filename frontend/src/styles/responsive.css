@@ -22,7 +22,7 @@
         font-size: 24px;
     }
     .callout-content p {
-        font-size: 11px;
+        font-size: 0.9375rem;
     }
     .callout-network {
         width: 280px;
@@ -43,15 +43,15 @@
         gap: 5px;
     }
     .hero-buttons .btn {
-        font-size: 10px;
+        font-size: 0.875rem;
         padding: 13px 14px;
     }
     .marketing-strip {
         margin-inline: 38px;
-        font-size: 10px;
+        font-size: 0.875rem;
     }
     .marketing-strip > div {
-        font-size: 11px;
+        font-size: 0.9375rem;
         gap: 8px;
     }
     .marketing-strip svg {
@@ -78,20 +78,20 @@
         padding-inline: 16px;
     }
     .sidebar .brand {
-        font-size: 22px;
+        font-size: 1.5rem;
     }
     .workspace-selector {
         padding: 11px 9px;
         gap: 8px;
     }
     .workspace-selector b {
-        font-size: 9px;
+        font-size: 0.8125rem;
     }
     .workspace-selector small {
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .sidebar nav > a {
-        font-size: 9px;
+        font-size: 0.8125rem;
         gap: 9px;
     }
     .sidebar nav > a.active:before {
@@ -119,10 +119,10 @@
         max-width: 280px;
     }
     .page-actions > select {
-        font-size: 8px;
+        font-size: 0.75rem;
     }
     .page-actions > .btn {
-        font-size: 8px;
+        font-size: 0.75rem;
         padding: 9px 10px;
     }
     .stats-grid {
@@ -132,10 +132,10 @@
         padding: 16px 14px;
     }
     .stat-label {
-        font-size: 9px;
+        font-size: 0.8125rem;
     }
     .stat-note {
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .mini-bars {
         gap: 2px;
@@ -166,7 +166,7 @@
         min-width: 104px;
     }
     .donut-legend > div {
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .donut-legend b {
         padding-left: 7px;
@@ -175,10 +175,10 @@
         padding: 19px 19px 17px;
     }
     .panel-head p {
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .panel-head h2 {
-        font-size: 11px;
+        font-size: 0.9375rem;
     }
     .dashboard-secondary-grid {
         gap: 16px;
@@ -187,7 +187,7 @@
         padding: 22px;
     }
     .callout-content h2 {
-        font-size: 18px;
+        font-size: 1.25rem;
     }
     .callout-network {
         width: 200px;
@@ -209,13 +209,13 @@
         padding: 18px 13px;
     }
     .ip-selected-stats strong {
-        font-size: 19px;
+        font-size: 1.3125rem;
     }
     .ip-selected-stats span {
-        font-size: 6px;
+        font-size: 0.6875rem;
     }
     .ip-caution {
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .ip-summary-grid {
         gap: 15px;
@@ -225,13 +225,13 @@
         gap: 12px;
     }
     .ip-summary-grid span {
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .api-playground {
         gap: 17px;
     }
     .api-intro p {
-        font-size: 8px;
+        font-size: 0.75rem;
     }
     .api-bottom-notes {
         gap: 20px;
@@ -249,20 +249,20 @@
 @media (max-width: 1050px) {
     .marketing-nav nav {
         gap: 22px;
-        font-size: 10px;
+        font-size: 0.875rem;
     }
     .hero-text h1 {
         font-size: 43px;
     }
     .hero-text p {
-        font-size: 11px;
+        font-size: 0.9375rem;
     }
     .hero-assurance {
-        font-size: 8px;
+        font-size: 0.75rem;
         gap: 15px;
     }
     .hero-text .eyebrow {
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .hero-index {
         margin-top: 29px;
@@ -277,10 +277,10 @@
         padding: 8px;
     }
     .scene-report b {
-        font-size: 8px;
+        font-size: 0.75rem;
     }
     .scene-report > div > span {
-        font-size: 6px;
+        font-size: 0.6875rem;
     }
     .scene-node {
         width: 45px;
@@ -298,19 +298,19 @@
         border-radius: 24px;
     }
     .scene-header {
-        font-size: 6px;
+        font-size: 0.6875rem;
     }
     .scene-header span:last-child {
-        font-size: 5px;
+        font-size: 0.6875rem;
     }
     .feature-card h3 {
-        font-size: 17px;
+        font-size: 1.1875rem;
     }
     .section-intro h2 {
         font-size: 31px;
     }
     .section-intro > p {
-        font-size: 10px;
+        font-size: 0.875rem;
     }
     .workflow-section {
         gap: 40px;
@@ -325,17 +325,17 @@
     .sidebar nav > a {
         padding: 11px 8px;
         gap: 8px;
-        font-size: 9px;
+        font-size: 0.8125rem;
     }
     .sidebar nav > a.active:before {
         left: -14px;
     }
     .tiny-label {
-        font-size: 5px;
+        font-size: 0.6875rem;
         padding: 3px;
     }
     .sidebar .brand {
-        font-size: 20px;
+        font-size: 1.375rem;
     }
     .workspace-selector {
         padding: 10px 8px;
@@ -345,26 +345,26 @@
         padding: 7px;
     }
     .workspace-selector b {
-        font-size: 8px;
+        font-size: 0.75rem;
     }
     .workspace-selector small {
-        font-size: 6px;
+        font-size: 0.6875rem;
     }
     .sidebar-help {
         padding: 15px 12px;
     }
     .sidebar-help b {
-        font-size: 8px;
+        font-size: 0.75rem;
     }
     .sidebar-help p {
-        font-size: 8px;
+        font-size: 0.75rem;
     }
     .sidebar-user b {
-        font-size: 8px;
+        font-size: 0.75rem;
         max-width: 100px;
     }
     .sidebar-user small {
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .console-main {
         margin-left: 200px;
@@ -386,10 +386,10 @@
         padding: 20px;
     }
     .stat-label {
-        font-size: 10px;
+        font-size: 0.875rem;
     }
     .stat-note {
-        font-size: 9px;
+        font-size: 0.8125rem;
     }
     .stat-value > strong {
         font-size: 36px;
@@ -407,7 +407,7 @@
         font-size: 26px;
     }
     .page-title p {
-        font-size: 9px;
+        font-size: 0.8125rem;
     }
     .page-actions {
         max-width: 180px;
@@ -417,10 +417,10 @@
     }
     .page-actions > select {
         width: 100%;
-        font-size: 9px;
+        font-size: 0.8125rem;
     }
     .page-actions > .btn {
-        font-size: 9px;
+        font-size: 0.8125rem;
     }
     .dashboard-main-grid {
         grid-template-columns: 1fr;
@@ -442,20 +442,20 @@
         gap: 17px;
     }
     .donut-legend > div {
-        font-size: 9px;
+        font-size: 0.8125rem;
         min-width: 165px;
     }
     .donut-legend b {
-        font-size: 10px;
+        font-size: 0.875rem;
     }
     .dashboard-secondary-grid {
         grid-template-columns: 1fr 1.35fr;
     }
     .callout-content h2 {
-        font-size: 17px;
+        font-size: 1.1875rem;
     }
     .callout-content p {
-        font-size: 8px;
+        font-size: 0.75rem;
     }
     .callout-network {
         width: 160px;
@@ -546,10 +546,10 @@
         gap: 20px;
     }
     .api-bottom-notes p {
-        font-size: 10px;
+        font-size: 0.875rem;
     }
     .api-bottom-notes h3 {
-        font-size: 12px;
+        font-size: 1rem;
     }
     .login-story {
         padding: 35px;
@@ -564,7 +564,7 @@
         font-size: 29px;
     }
     .login-story-copy p {
-        font-size: 10px;
+        font-size: 0.875rem;
     }
     .login-story {
         min-height: 850px;
@@ -579,7 +579,7 @@
         display: none;
     }
     .marketing-nav .brand {
-        font-size: 22px;
+        font-size: 1.5rem;
     }
     .marketing-nav > div {
         gap: 20px;
@@ -595,17 +595,17 @@
         line-height: 1.23;
     }
     .hero-text p {
-        font-size: 13px;
+        font-size: 1.0625rem;
     }
     .hero-text .eyebrow {
-        font-size: 8px;
+        font-size: 0.75rem;
     }
     .hero-buttons .btn {
-        font-size: 12px;
+        font-size: 1rem;
         padding: 15px 19px;
     }
     .hero-assurance {
-        font-size: 10px;
+        font-size: 0.875rem;
         gap: 25px;
     }
     .hero-index {
@@ -619,7 +619,7 @@
         aspect-ratio: 600/450;
     }
     .hero-caption {
-        font-size: 10px;
+        font-size: 0.875rem;
     }
     .radar-core {
         width: 80px;
@@ -637,19 +637,19 @@
         gap: 14px;
     }
     .scene-report b {
-        font-size: 11px;
+        font-size: 0.9375rem;
     }
     .scene-report > div > span {
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .report-icon {
         padding: 11px;
     }
     .scene-header {
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .scene-header span:last-child {
-        font-size: 6px;
+        font-size: 0.6875rem;
     }
     .marketing-strip {
         margin-inline: 28px;
@@ -664,7 +664,7 @@
     }
     .marketing-strip > div {
         width: 43%;
-        font-size: 12px;
+        font-size: 1rem;
         justify-content: center;
     }
     .platform-section {
@@ -677,7 +677,7 @@
         font-size: 32px;
     }
     .section-intro > p {
-        font-size: 11px;
+        font-size: 0.9375rem;
         margin-top: 20px;
     }
     .feature-grid {
@@ -691,15 +691,15 @@
         margin-bottom: 24px;
     }
     .feature-card h3 {
-        font-size: 22px;
+        font-size: 1.5rem;
         max-width: none;
     }
     .feature-card p {
-        font-size: 12px;
+        font-size: 1rem;
         max-width: 500px;
     }
     .feature-card .text-button {
-        font-size: 11px;
+        font-size: 0.9375rem;
     }
     .workflow-section {
         grid-template-columns: 1fr;
@@ -710,7 +710,7 @@
         font-size: 38px;
     }
     .workflow-section p {
-        font-size: 12px;
+        font-size: 1rem;
     }
     .cta-section {
         margin: 0 28px 45px;
@@ -721,13 +721,13 @@
         font-size: 31px;
     }
     .cta-section .eyebrow {
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .cta-section p {
-        font-size: 10px;
+        font-size: 0.875rem;
     }
     .cta-section .btn {
-        font-size: 10px;
+        font-size: 0.875rem;
     }
     .marketing-footer {
         padding: 27px 28px;
@@ -739,7 +739,7 @@
     }
     .marketing-footer > span {
         width: 100%;
-        font-size: 8px;
+        font-size: 0.75rem;
     }
     .login-page {
         grid-template-columns: 1fr;
@@ -759,23 +759,23 @@
         font-size: 32px;
     }
     .login-form-wrap > p {
-        font-size: 11px;
+        font-size: 0.9375rem;
     }
     .login-form-wrap label {
-        font-size: 11px;
+        font-size: 0.9375rem;
     }
     .login-form-wrap input {
-        font-size: 12px;
+        font-size: 1rem;
         min-height: 46px;
     }
     .login-form-wrap .btn {
-        font-size: 12px;
+        font-size: 1rem;
     }
     .login-demo-note {
-        font-size: 9px;
+        font-size: 0.8125rem;
     }
     .login-register {
-        font-size: 11px;
+        font-size: 0.9375rem;
     }
     .sidebar {
         transform: translateX(-100%);
@@ -791,43 +791,43 @@
         font-size: 24px;
     }
     .sidebar nav > a {
-        font-size: 11px;
+        font-size: 0.9375rem;
         padding: 13px 10px;
     }
     .sidebar nav > a.active:before {
         left: -20px;
     }
     .workspace-selector b {
-        font-size: 10px;
+        font-size: 0.875rem;
     }
     .workspace-selector small {
-        font-size: 8px;
+        font-size: 0.75rem;
     }
     .workspace-selector {
         margin-top: 30px;
         padding: 12px 10px;
     }
     .sidebar-user b {
-        font-size: 9px;
+        font-size: 0.8125rem;
         max-width: 120px;
     }
     .sidebar-user small {
-        font-size: 8px;
+        font-size: 0.75rem;
     }
     .sidebar-help {
         display: none;
     }
     .environment {
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .sidebar-label {
-        font-size: 8px;
+        font-size: 0.75rem;
     }
     .sidebar-lower {
         padding-top: 25px;
     }
     .tiny-label {
-        font-size: 6px;
+        font-size: 0.6875rem;
     }
     .sidebar-brand {
         display: flex;
@@ -867,14 +867,14 @@
     }
     .breadcrumb {
         margin-right: auto;
-        font-size: 9px;
+        font-size: 0.8125rem;
         gap: 8px;
     }
     .header-right {
         gap: 10px;
     }
     .header-right > .pill {
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .header-divider {
         display: none;
@@ -889,28 +889,28 @@
         font-size: 27px;
     }
     .page-title .eyebrow {
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .page-title p {
-        font-size: 10px;
+        font-size: 0.875rem;
     }
     .stat-note {
-        font-size: 8px;
+        font-size: 0.75rem;
     }
     .console-footer {
-        font-size: 6px;
+        font-size: 0.6875rem;
     }
     .page-title > .pill {
-        font-size: 8px;
+        font-size: 0.75rem;
         white-space: normal;
         max-width: 140px;
         text-align: right;
     }
     .graph-stats {
-        font-size: 9px;
+        font-size: 0.8125rem;
     }
     .graph-panel .panel-head .text-button {
-        font-size: 9px;
+        font-size: 0.8125rem;
     }
     .ip-summary-grid > div {
         padding: 17px;
@@ -923,7 +923,7 @@
         grid-row: auto;
     }
     .ip-summary-grid span {
-        font-size: 8px;
+        font-size: 0.75rem;
         line-height: 1.7;
     }
     .ip-summary-grid strong {
@@ -933,10 +933,10 @@
         gap: 12px;
     }
     .api-intro p {
-        font-size: 9px;
+        font-size: 0.8125rem;
     }
     .api-intro b {
-        font-size: 12px;
+        font-size: 1rem;
     }
     .api-intro-icon {
         padding: 11px;
@@ -946,14 +946,14 @@
         padding: 18px;
     }
     .info-banner p {
-        font-size: 10px;
+        font-size: 0.875rem;
     }
     .case-drawer {
         width: 100%;
         border-radius: 0;
     }
     .case-drawer .drawer-top h2 {
-        font-size: 21px;
+        font-size: 1.4375rem;
     }
     .modal-backdrop {
         padding: 17px;
@@ -965,7 +965,7 @@
         height: 77px;
     }
     .marketing-nav .brand {
-        font-size: 20px;
+        font-size: 1.375rem;
     }
     .marketing-nav .brand-mark {
         width: 30px;
@@ -975,7 +975,7 @@
         font-size: 5px;
     }
     .marketing-nav .btn {
-        font-size: 9px;
+        font-size: 0.8125rem;
         min-height: 34px;
         padding: 9px 11px;
         gap: 7px;
@@ -984,14 +984,14 @@
         gap: 13px;
     }
     .nav-login {
-        font-size: 9px;
+        font-size: 0.8125rem;
     }
     .marketing-hero {
         padding: 40px 22px;
         gap: 30px;
     }
     .hero-text .eyebrow {
-        font-size: 6px;
+        font-size: 0.6875rem;
         letter-spacing: 1.1px;
     }
     .hero-text h1 {
@@ -1000,14 +1000,14 @@
         margin-top: 24px;
     }
     .hero-text p {
-        font-size: 11px;
+        font-size: 0.9375rem;
         line-height: 1.95;
     }
     .desktop-break {
         display: none;
     }
     .hero-buttons .btn {
-        font-size: 10px;
+        font-size: 0.875rem;
         padding: 13px 13px;
         gap: 8px;
     }
@@ -1016,7 +1016,7 @@
         margin-top: 25px;
     }
     .hero-assurance {
-        font-size: 8px;
+        font-size: 0.75rem;
         gap: 19px;
     }
     .hero-visual .radar-scene {
@@ -1028,7 +1028,7 @@
         border-radius: 10px;
     }
     .scene-node > span {
-        font-size: 6px;
+        font-size: 0.6875rem;
     }
     .scene-node > svg {
         width: 17px;
@@ -1053,10 +1053,10 @@
         bottom: 32px;
     }
     .scene-report b {
-        font-size: 8px;
+        font-size: 0.75rem;
     }
     .scene-report > div > span {
-        font-size: 5px;
+        font-size: 0.6875rem;
         margin-top: 6px;
     }
     .report-icon {
@@ -1066,7 +1066,7 @@
         width: 17px;
     }
     .report-score {
-        font-size: 23px;
+        font-size: 1.5625rem;
     }
     .report-score small {
         font-size: 4px;
@@ -1075,7 +1075,7 @@
         top: 15px;
         left: 14px;
         right: 14px;
-        font-size: 5px;
+        font-size: 0.6875rem;
         letter-spacing: 0.6px;
     }
     .scene-header span:last-child {
@@ -1088,14 +1088,14 @@
         font-size: 4px;
     }
     .hero-caption {
-        font-size: 8px;
+        font-size: 0.75rem;
     }
     .marketing-strip {
         margin-inline: 22px;
         gap: 20px;
     }
     .marketing-strip > div {
-        font-size: 10px;
+        font-size: 0.875rem;
         width: 44%;
         gap: 8px;
     }
@@ -1109,13 +1109,13 @@
         font-size: 29px;
     }
     .section-intro > p {
-        font-size: 10px;
+        font-size: 0.875rem;
     }
     .feature-card h3 {
-        font-size: 21px;
+        font-size: 1.4375rem;
     }
     .feature-card p {
-        font-size: 11px;
+        font-size: 0.9375rem;
     }
     .workflow-section {
         padding: 0 22px 45px;
@@ -1124,21 +1124,21 @@
         font-size: 36px;
     }
     .workflow-section p {
-        font-size: 11px;
+        font-size: 0.9375rem;
     }
     .workflow-code pre {
-        font-size: 10px;
+        font-size: 0.875rem;
         padding: 21px;
     }
     .code-window-top {
         padding: 15px 17px;
-        font-size: 6px;
+        font-size: 0.6875rem;
     }
     .code-window-top > .pill {
-        font-size: 6px;
+        font-size: 0.6875rem;
     }
     .code-comment {
-        font-size: 8px;
+        font-size: 0.75rem;
     }
     .cta-section {
         display: block;
@@ -1153,26 +1153,26 @@
         margin-top: 25px;
     }
     .cta-section p {
-        font-size: 11px;
+        font-size: 0.9375rem;
     }
     .cta-section .btn {
-        font-size: 11px;
+        font-size: 0.9375rem;
     }
     .cta-section a {
-        font-size: 9px;
+        font-size: 0.8125rem;
     }
     .marketing-footer {
         padding: 25px 22px;
     }
     .marketing-footer p {
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .console-header {
         padding-inline: 14px;
         gap: 8px;
     }
     .breadcrumb {
-        font-size: 8px;
+        font-size: 0.75rem;
         gap: 6px;
     }
     .header-right > .pill {
@@ -1190,7 +1190,7 @@
         letter-spacing: -0.8px;
     }
     .page-title p {
-        font-size: 9px;
+        font-size: 0.8125rem;
         margin-top: 9px;
     }
     .page-title > .btn {
@@ -1212,11 +1212,11 @@
     .page-actions > select {
         width: auto;
         flex: 1;
-        font-size: 9px;
+        font-size: 0.8125rem;
         padding: 9px;
     }
     .page-actions > .btn {
-        font-size: 8px;
+        font-size: 0.75rem;
         padding: 10px;
     }
     .stats-grid {
@@ -1226,7 +1226,7 @@
         padding: 16px 13px;
     }
     .stat-label {
-        font-size: 8px;
+        font-size: 0.75rem;
         gap: 5px;
     }
     .stat-label > span {
@@ -1250,7 +1250,7 @@
         width: 3px;
     }
     .stat-note {
-        font-size: 6px;
+        font-size: 0.6875rem;
         white-space: nowrap;
         gap: 4px;
     }
@@ -1263,14 +1263,14 @@
         gap: 10px;
     }
     .panel-head h2 {
-        font-size: 11px;
+        font-size: 0.9375rem;
     }
     .panel-head p {
-        font-size: 7px;
+        font-size: 0.75rem;
         line-height: 1.9;
     }
     .chart-legend {
-        font-size: 6px;
+        font-size: 0.6875rem;
         gap: 8px;
     }
     .chart-legend span {
@@ -1287,14 +1287,14 @@
         height: 190px;
     }
     .chart-foot {
-        font-size: 6px;
+        font-size: 0.6875rem;
         padding: 12px 16px;
     }
     .review-donut-layout {
         gap: 30px !important;
     }
     .donut-legend > div {
-        font-size: 8px;
+        font-size: 0.75rem;
         min-width: 130px;
     }
     .review-progress {
@@ -1308,10 +1308,10 @@
         padding: 26px;
     }
     .callout-content h2 {
-        font-size: 20px;
+        font-size: 1.375rem;
     }
     .callout-content p {
-        font-size: 9px;
+        font-size: 0.8125rem;
     }
     .callout-network {
         width: 200px;
@@ -1320,7 +1320,7 @@
     }
     .data-scope-note {
         display: block;
-        font-size: 7px;
+        font-size: 0.75rem;
         line-height: 1.9;
     }
     .data-scope-note > span {
@@ -1331,7 +1331,7 @@
     }
     .console-footer {
         display: block;
-        font-size: 6px;
+        font-size: 0.6875rem;
         line-height: 1.9;
     }
     .console-footer > span:last-child {
@@ -1345,12 +1345,12 @@
         padding: 15px;
     }
     .filters-bar select {
-        font-size: 8px;
+        font-size: 0.75rem;
         padding: 9px 7px;
         min-height: 34px;
     }
     .filters-bar > .btn {
-        font-size: 8px;
+        font-size: 0.75rem;
         padding: 9px;
         min-height: 34px;
     }
@@ -1358,10 +1358,10 @@
         width: 12px;
     }
     .filters-bar .search-input input {
-        font-size: 10px;
+        font-size: 0.875rem;
     }
     .results-meta {
-        font-size: 7px;
+        font-size: 0.75rem;
         padding-inline: 15px;
     }
     .results-meta > span:last-child {
@@ -1381,7 +1381,7 @@
     }
     .pagination {
         padding: 14px 15px;
-        font-size: 8px;
+        font-size: 0.75rem;
     }
     .pagination > div {
         gap: 10px;
@@ -1392,7 +1392,7 @@
         gap: 10px;
     }
     .info-banner p {
-        font-size: 9px;
+        font-size: 0.8125rem;
     }
     .info-banner > svg {
         width: 16px;
@@ -1408,17 +1408,17 @@
         min-width: 210px;
     }
     .graph-stats {
-        font-size: 7px;
+        font-size: 0.75rem;
         padding-inline: 16px;
         gap: 12px;
     }
     .graph-key {
-        font-size: 6px;
+        font-size: 0.6875rem;
         gap: 13px;
         padding-inline: 10px;
     }
     .graph-stats > .pill {
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .flow-graph {
         min-height: 260px;
@@ -1428,29 +1428,29 @@
         gap: 10px;
     }
     .selected-account p {
-        font-size: 8px;
+        font-size: 0.75rem;
     }
     .selected-account h3 {
-        font-size: 14px;
+        font-size: 1.125rem;
     }
     .selected-account > .pill {
-        font-size: 8px;
+        font-size: 0.75rem;
     }
     .chain-list {
         padding-inline: 16px;
     }
     .chain-list > div {
-        font-size: 9px;
+        font-size: 0.8125rem;
         gap: 8px;
     }
     .chain-list b {
-        font-size: 9px;
+        font-size: 0.8125rem;
     }
     .chain-list small {
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .subtle-note {
-        font-size: 8px;
+        font-size: 0.75rem;
         line-height: 1.9;
         align-items: flex-start;
     }
@@ -1467,7 +1467,7 @@
         font-size: 24px;
     }
     .ip-summary-grid span {
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .ip-summary-grid svg {
         width: 33px;
@@ -1483,7 +1483,7 @@
         border-radius: 12px;
     }
     .ip-center .mono {
-        font-size: 8px;
+        font-size: 0.75rem;
     }
     .ip-center svg {
         width: 23px;
@@ -1493,13 +1493,13 @@
         gap: 4px;
     }
     .ip-selected-stats strong {
-        font-size: 18px;
+        font-size: 1.25rem;
     }
     .ip-selected-stats span {
-        font-size: 6px;
+        font-size: 0.6875rem;
     }
     .ip-caution {
-        font-size: 7px;
+        font-size: 0.75rem;
         align-items: flex-start;
         line-height: 1.9;
         padding: 17px 15px;
@@ -1509,7 +1509,7 @@
         margin-top: 2px;
     }
     .ip-visual-note {
-        font-size: 5px;
+        font-size: 0.6875rem;
     }
     .api-intro {
         padding: 16px;
@@ -1523,10 +1523,10 @@
         width: 21px;
     }
     .api-intro b {
-        font-size: 10px;
+        font-size: 0.875rem;
     }
     .api-intro p {
-        font-size: 8px;
+        font-size: 0.75rem;
     }
     .api-intro > .pill {
         display: none;
@@ -1535,11 +1535,11 @@
         gap: 20px;
     }
     .page-tabs button {
-        font-size: 8px;
+        font-size: 0.75rem;
         gap: 6px;
     }
     .page-tabs a {
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .page-tabs svg {
         width: 12px;
@@ -1549,27 +1549,27 @@
         padding: 12px;
     }
     .endpoint-bar code {
-        font-size: 8px;
+        font-size: 0.75rem;
     }
     .endpoint-bar .http-method {
-        font-size: 7px;
+        font-size: 0.75rem;
         padding: 4px 5px;
     }
     .request-controls {
         padding-inline: 17px;
     }
     .request-controls label {
-        font-size: 10px;
+        font-size: 0.875rem;
     }
     .request-controls select,
     .request-controls input {
-        font-size: 11px;
+        font-size: 0.9375rem;
     }
     .editor-header {
         padding-inline: 17px;
     }
     .api-editor {
-        font-size: 11px;
+        font-size: 0.9375rem;
         padding-inline: 17px;
         min-height: 165px;
     }
@@ -1577,39 +1577,39 @@
         padding: 15px 17px;
     }
     .request-actions > span {
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .api-response pre {
         padding: 18px;
-        font-size: 9px;
+        font-size: 0.8125rem;
     }
     .api-response .pill {
-        font-size: 6px;
+        font-size: 0.6875rem;
     }
     .response-placeholder h3 {
-        font-size: 13px;
+        font-size: 1.0625rem;
     }
     .response-placeholder p {
-        font-size: 10px;
+        font-size: 0.875rem;
     }
     .producer-flow {
         gap: 7px;
         padding: 18px 15px;
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .producer-flow b {
-        font-size: 6px;
+        font-size: 0.6875rem;
     }
     .producer-code {
         padding: 19px;
-        font-size: 9px;
+        font-size: 0.8125rem;
     }
     .ingest-json {
         padding: 18px;
-        font-size: 9px;
+        font-size: 0.8125rem;
     }
     .api-bottom-notes p {
-        font-size: 9px;
+        font-size: 0.8125rem;
     }
     .modal {
         padding: 28px 22px;
@@ -1628,14 +1628,14 @@
         gap: 6px;
     }
     .case-badges .pill {
-        font-size: 8px;
+        font-size: 0.75rem;
     }
     .drawer-tabs {
         padding-inline: 23px;
         gap: 22px;
     }
     .drawer-tabs button {
-        font-size: 9px;
+        font-size: 0.8125rem;
     }
     .case-amount {
         padding: 25px 23px;
@@ -1651,13 +1651,13 @@
         padding: 15px 12px;
     }
     .account-transfer b {
-        font-size: 13px;
+        font-size: 1.0625rem;
     }
     .account-transfer > div > span:last-child {
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .account-transfer small {
-        font-size: 5px;
+        font-size: 0.6875rem;
     }
     .account-transfer > svg {
         width: 16px;
@@ -1666,7 +1666,7 @@
         margin: 23px;
     }
     .score-explainer p {
-        font-size: 10px;
+        font-size: 0.875rem;
     }
     .rule-hits {
         padding: 0 23px 25px;
@@ -1675,21 +1675,21 @@
         gap: 9px;
     }
     .rule-hits article p {
-        font-size: 9px;
+        font-size: 0.8125rem;
     }
     .drawer-bottom {
         padding: 23px;
     }
     .drawer-bottom .btn {
-        font-size: 9px;
+        font-size: 0.8125rem;
         padding: 10px 12px;
     }
     .drawer-bottom > div:first-child {
-        font-size: 8px;
+        font-size: 0.75rem;
         line-height: 1.9;
     }
     .toast {
-        font-size: 10px;
+        font-size: 0.875rem;
         min-width: 240px;
         bottom: 18px;
         padding: 14px 17px;
@@ -1698,16 +1698,16 @@
         padding: 24px;
     }
     .login-form-wrap > .eyebrow {
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .login-form-wrap h2 {
         font-size: 30px;
     }
     .login-meta {
-        font-size: 7px;
+        font-size: 0.75rem;
     }
     .login-register button {
-        font-size: 10px;
+        font-size: 0.875rem;
     }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1733,5 +1733,81 @@
     }
     .radar-sweep {
         opacity: 0.4;
+    }
+}
+
+/* Give larger text room to wrap without shrinking it on narrow screens. */
+.page-title,
+.page-actions,
+.filters-bar,
+.panel-head,
+.ip-metrics {
+    flex-wrap: wrap;
+}
+.page-title > div,
+.panel-head > div {
+    min-width: 0;
+}
+.filters-bar > .search-input {
+    flex-basis: 220px;
+}
+.sidebar {
+    overflow-y: auto;
+}
+.sidebar nav > a {
+    line-height: 1.5;
+}
+.console-header {
+    min-height: 77px;
+    height: auto;
+    padding-block: 16px;
+}
+.stat-label {
+    align-items: flex-start;
+    line-height: 1.5;
+}
+.stat-note {
+    flex-wrap: wrap;
+    line-height: 1.6;
+}
+.ip-summary-grid span {
+    line-height: 1.6;
+}
+.ip-group-list {
+    max-height: 560px;
+}
+@media (max-width: 900px) {
+    .ip-group-list {
+        max-height: 260px;
+    }
+}
+@media (max-width: 600px) {
+    .page-actions,
+    .page-actions .btn,
+    .page-actions select {
+        max-width: 100%;
+    }
+    .filters-bar > .search-input {
+        flex-basis: 100%;
+    }
+    .marketing-nav .nav-actions {
+        flex-wrap: wrap;
+    }
+}
+
+@media (min-width: 761px) {
+    .sidebar {
+        width: 244px;
+    }
+    .console-main {
+        margin-left: 244px;
+    }
+}
+@media (min-width: 1251px) {
+    .sidebar {
+        width: 264px;
+    }
+    .console-main {
+        margin-left: 264px;
     }
 }
