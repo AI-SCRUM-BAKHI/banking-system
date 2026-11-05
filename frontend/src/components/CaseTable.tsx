@@ -11,6 +11,7 @@ export function CaseTable({
     onSelect: (id: string) => void
     showIp?: boolean
 }) {
+    const showSourceLabels = showIp && rows.some((r) => r.sourceFraud !== undefined)
     return rows.length ? (
         <div className="table-scroll">
             <table>
@@ -19,6 +20,7 @@ export function CaseTable({
                         <th>GIAO DỊCH / THỜI GIAN</th>
                         <th>TÀI KHOẢN</th>
                         {showIp && <th>ĐỊA CHỈ IP</th>}
+                        {showSourceLabels && <th>NHÃN CSV</th>}
                         <th>GIÁ TRỊ</th>
                         <th>RỦI RO</th>
                         <th>ĐIỀU TRA</th>
@@ -43,7 +45,12 @@ export function CaseTable({
                             </td>
                             {showIp && (
                                 <td>
-                                    <span className="mono ip-text">{row.demoIp || '—'}</span>
+                                    <span className="mono ip-text">{row.ipAddress || row.demoIp || '—'}</span>
+                                </td>
+                            )}
+                            {showSourceLabels && (
+                                <td>
+                                    {row.sourceFraud === true ? 'Fraud' : row.sourceFraud === false ? 'Normal' : '—'}
                                 </td>
                             )}
                             <td className="table-amount">{money(row.amount, row.currency)}</td>

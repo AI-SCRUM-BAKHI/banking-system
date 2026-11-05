@@ -7,6 +7,7 @@ import { useCases } from '../lib/queries'
 import { useConsole } from '../lib/console-context'
 import { Panel, Pill } from '../components/ui'
 import type { FraudFilters } from '../types/fraud.types'
+import { EvaluationPlayground } from '../components/EvaluationPlayground'
 const endpoints = [
     {
         key: 'summary',
@@ -90,13 +91,13 @@ export function ApiPage() {
     const [result, setResult] = useState('')
     const [busy, setBusy] = useState(false)
     const [failed, setFailed] = useState(false)
-    const [tab, setTab] = useState<'playground' | 'ingest'>('playground')
+    const [tab, setTab] = useState<'detect' | 'playground' | 'ingest'>('detect')
     const [copied, setCopied] = useState(false)
     const examples = useCases(session.mode, { size: 1 })
     const selected = endpoints.find((e) => e.key === key)!
     const actualId = id || examples.data?.content[0]?.id || ''
     const path = selected.path.replace('{id}', encodeURIComponent(actualId))
-    const base = env.VITE_API_BASE_URL.replace(/\/$/, '')
+    const base = new URL(env.VITE_API_BASE_URL, window.location.origin).toString().replace(/\/$/, '')
     const requiresId = selected.path.includes('{id}')
     async function copy(text: string) {
         try {
@@ -182,7 +183,7 @@ export function ApiPage() {
                     <p>
                         {session.mode === 'demo'
                             ? 'Response được mô phỏng trong browser, theo cấu trúc DTO hiện có. Đăng nhập thật để gửi request đến backend.'
-                            : 'Request sử dụng bearer token của phiên đăng nhập và gọi API đã cấu hình.'}
+                            : 'Detect fraud sử dụng gateway xác thực phiên đăng nhập để chạy engine. Các truy vấn hồ sơ sử dụng bearer token.'}
                     </p>
                 </div>
                 <Pill tone={session.mode === 'demo' ? 'amber' : 'green'}>
@@ -190,6 +191,10 @@ export function ApiPage() {
                 </Pill>
             </div>
             <div className="page-tabs">
+                <button className={tab === 'detect' ? 'active' : ''} onClick={() => setTab('detect')}>
+                    <ShieldCheck size={15} />
+                    Detect fraud
+                </button>
                 <button className={tab === 'playground' ? 'active' : ''} onClick={() => setTab('playground')}>
                     <Play size={15} />
                     Query playground
@@ -202,7 +207,9 @@ export function ApiPage() {
                     Swagger <ExternalLink size={13} />
                 </a>
             </div>
-            {tab === 'playground' ? (
+            {tab === 'detect' ? (
+                <EvaluationPlayground />
+            ) : tab === 'playground' ? (
                 <>
                     <div className="endpoint-bar">
                         <span className="http-method">GET</span>
@@ -356,6 +363,11 @@ export function ApiPage() {
                                             'Body: { "status": "REVIEWING" }',
                                         ],
                                         ['POST', '/users', 'Tạo tài khoản; chỉ ADMIN'],
+                                        [
+                                            'POST',
+                                            '/transactions/evaluate',
+                                            'Đánh giá fraud; gateway xác thực JWT và gọi engine bằng service token',
+                                        ],
                                     ].map(([method, url, desc]) => (
                                         <tr key={url + method}>
                                             <td>
@@ -455,9 +467,9 @@ export function ApiPage() {
                 <div>
                     <h3>Về endpoint chấm điểm</h3>
                     <p>
-                        POST /transactions/evaluate mới là đề xuất trong Spec.md.
+                        POST /transactions/evaluate chạy engine rule-score-v1.
                         <br />
-                        Frontend không gọi hoặc giả lập đó là API đã triển khai.
+                        Mở tab Detect fraud để gửi input và xem kết quả từ backend.
                     </p>
                 </div>
                 <div>

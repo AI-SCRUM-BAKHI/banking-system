@@ -30,8 +30,24 @@ function savedSession(): Session | null {
         return null
     }
 }
+function savedLiveSession(): Session | null {
+    if (!getTokens()) return null
+    try {
+        const saved = JSON.parse(sessionStorage.getItem('aegis.live-session') || 'null')
+        if (saved?.mode === 'live' && saved.user?.id) return saved
+        const legacy = savedSession()
+        return legacy?.mode === 'live' ? legacy : null
+    } catch {
+        return null
+    }
+}
+function ResumeLiveWorkspace({ onResume }: { onResume: () => void }) {
+    useEffect(onResume, [onResume])
+    return <Loading text="Đang mở workspace tài khoản…" />
+}
 function Application() {
     const [session, setSession] = useState<Session | null>(savedSession)
+    const [liveSession, setLiveSession] = useState<Session | null>(savedLiveSession)
     const [toast, setToast] = useState('')
     const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
     const client = useQueryClient()
@@ -50,6 +66,8 @@ function Application() {
     const clearSession = useCallback(() => {
         setTokens(null)
         sessionStorage.removeItem('aegis.session')
+        sessionStorage.removeItem('aegis.live-session')
+        setLiveSession(null)
         setSession(null)
         client.clear()
     }, [client])
@@ -62,16 +80,43 @@ function Application() {
         window.addEventListener('aegis:session-expired', expired)
         return () => window.removeEventListener('aegis:session-expired', expired)
     }, [clearSession, navigate, notify])
-    function start(mode: Session['mode'], user: CurrentUser) {
-        if (mode === 'demo') setTokens(null)
-        client.clear()
-        const next = { mode, user }
-        setSession(next)
-        sessionStorage.setItem('aegis.session', JSON.stringify(next))
-        navigate('/console')
-        window.scrollTo(0, 0)
-    }
+    const start = useCallback(
+        (mode: Session['mode'], user: CurrentUser) => {
+            client.clear()
+            const next = { mode, user }
+            if (mode === 'live') {
+                setLiveSession(next)
+                sessionStorage.setItem('aegis.live-session', JSON.stringify(next))
+            } else {
+                // Migrate an existing signed-in session before entering the independent demo workspace.
+                const currentLive = savedLiveSession()
+                if (currentLive) sessionStorage.setItem('aegis.live-session', JSON.stringify(currentLive))
+            }
+            setSession(next)
+            sessionStorage.setItem('aegis.session', JSON.stringify(next))
+            navigate('/console')
+            window.scrollTo(0, 0)
+        },
+        [client, navigate],
+    )
+    const resumeLive = useCallback(() => {
+        if (liveSession && getTokens()) start('live', liveSession.user)
+        else {
+            clearSession()
+            navigate('/login')
+        }
+    }, [liveSession, start, clearSession, navigate])
     async function end() {
+        if (session?.mode === 'demo') {
+            if (liveSession) resumeLive()
+            else {
+                sessionStorage.removeItem('aegis.session')
+                setSession(null)
+                client.clear()
+                navigate('/')
+            }
+            return
+        }
         if (session?.mode === 'live') {
             try {
                 await logout()
@@ -88,12 +133,25 @@ function Application() {
                 Đến nội dung chính
             </a>
             <Routes>
-                <Route path="/" element={<LandingPage onDemo={() => start('demo', demoUser)} />} />
+                <Route
+                    path="/"
+                    element={
+                        <LandingPage
+                            account={liveSession?.user || null}
+                            onOpenWorkspace={resumeLive}
+                            onDemo={() => start('demo', demoUser)}
+                        />
+                    }
+                />
                 <Route
                     path="/login"
                     element={
-                        session ? (
-                            <Navigate to="/console" replace />
+                        liveSession ? (
+                            session?.mode === 'live' ? (
+                                <Navigate to="/console" replace />
+                            ) : (
+                                <ResumeLiveWorkspace onResume={resumeLive} />
+                            )
                         ) : (
                             <LoginPage onDemo={() => start('demo', demoUser)} onLogin={(user) => start('live', user)} />
                         )
@@ -103,7 +161,12 @@ function Application() {
                     path="/console"
                     element={
                         session ? (
-                            <ConsoleLayout session={session} onLogout={end} notify={notify} />
+                            <ConsoleLayout
+                                session={session}
+                                onLogout={end}
+                                notify={notify}
+                                onResumeLive={liveSession ? resumeLive : undefined}
+                            />
                         ) : (
                             <Navigate to="/login" replace />
                         )

@@ -32,7 +32,9 @@ export interface FraudSummary {
     riskLevel: RiskLevel
     reviewStatus: ReviewStatus
     createdAt: string
-    /** Available only in the explicitly synthetic demo. Backend does not provide IP. */
+    /** Synthetic address used only in demo mode. */
+    ipAddress?: string
+    sourceFraud?: boolean
     demoIp?: string
 }
 export interface Account {
@@ -98,4 +100,23 @@ export interface FraudFilters {
     from?: string
     to?: string
     sort?: string
+}
+
+export interface IpIntelligenceGroup {
+    ip: string
+    count: number
+    sourceFraud: number
+    engineFraud: number
+    confirmed: number
+    highRisk: number
+    accounts: number
+    accountLabels: string[]
+    amount: number
+    records: FraudSummary[]
+}
+export interface IpIntelligence {
+    totalTransactions: number
+    transactionsWithIp: number
+    sourceFraudTransactions: number
+    groups: IpIntelligenceGroup[]
 }

@@ -30,7 +30,7 @@ export function VolumeChart({ rows }: { rows: FraudSummary[] }) {
                 {[0, 0.25, 0.5, 0.75, 1].map((r) => (
                     <g key={r}>
                         <line x1="45" x2="625" y1={y(max * r)} y2={y(max * r)} stroke="#e8edf5" strokeDasharray="3 5" />
-                        <text x="29" y={y(max * r) + 4} textAnchor="end" fill="#9aa5b6" fontSize="9">
+                        <text x="29" y={y(max * r) + 4} textAnchor="end" fill="#9aa5b6" fontSize="12">
                             {Math.round(max * r)}
                         </text>
                     </g>
@@ -63,7 +63,7 @@ export function VolumeChart({ rows }: { rows: FraudSummary[] }) {
                 )}
                 {data.map((d, i) => (
                     <g key={d.day}>
-                        <text x={x(i)} y="215" textAnchor="middle" fontSize="9" fill="#8b96a8">
+                        <text x={x(i)} y="215" textAnchor="middle" fontSize="12" fill="#8b96a8">
                             {d.day.slice(8)} Th{Number(d.day.slice(5, 7))}
                         </text>
                         <rect
@@ -83,8 +83,21 @@ export function VolumeChart({ rows }: { rows: FraudSummary[] }) {
                             <g pointerEvents="none">
                                 <line x1={x(i)} x2={x(i)} y1="22" y2="188" stroke="#b5c8e9" strokeDasharray="4 3" />
                                 <circle cx={x(i)} cy={y(d.total)} r="5" fill="white" stroke="#3478e5" strokeWidth="2" />
-                                <rect x={Math.min(x(i) - 46, 530)} y="0" width="92" height="27" rx="6" fill="#182f52" />
-                                <text x={Math.min(x(i), 576)} y="17" textAnchor="middle" fill="white" fontSize="9">
+                                <rect
+                                    x={Math.max(0, Math.min(x(i) - 70, 510))}
+                                    y="0"
+                                    width="140"
+                                    height="27"
+                                    rx="6"
+                                    fill="#182f52"
+                                />
+                                <text
+                                    x={Math.max(70, Math.min(x(i), 580))}
+                                    y="17"
+                                    textAnchor="middle"
+                                    fill="white"
+                                    fontSize="12"
+                                >
                                     {d.total} hồ sơ · {d.high} cao
                                 </text>
                             </g>

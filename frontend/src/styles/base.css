@@ -18,6 +18,8 @@ html {
     scroll-padding-top: 30px;
 }
 body {
+    font-size: 1rem;
+    line-height: 1.6;
     min-width: 320px;
     min-height: 100vh;
     margin: 0;
@@ -90,7 +92,7 @@ strong {
     font-weight: 600;
 }
 small {
-    font-size: 10px;
+    font-size: 0.875rem;
 }
 pre,
 code,
@@ -112,7 +114,7 @@ select {
     border-radius: 7px;
     background: #fff;
     padding: 10px 30px 10px 12px;
-    font-size: 11px;
+    font-size: 0.9375rem;
     min-height: 38px;
 }
 input::placeholder,
@@ -131,7 +133,7 @@ input {
     justify-content: center;
     gap: 12px;
     padding: 14px 21px;
-    font-size: 12px;
+    font-size: 1rem;
     font-weight: 500;
     border: 1px solid transparent;
     border-radius: 7px;
@@ -176,7 +178,7 @@ input {
 }
 .btn.small {
     padding: 10px 14px;
-    font-size: 10px;
+    font-size: 0.875rem;
     min-height: 36px;
     gap: 8px;
 }
@@ -205,7 +207,7 @@ input {
     display: inline-flex;
     align-items: center;
     gap: 9px;
-    font-size: 10px;
+    font-size: 0.875rem;
     font-weight: 500;
     color: var(--blue);
     padding: 0;
@@ -216,7 +218,7 @@ input {
 }
 .eyebrow {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 9px;
+    font-size: 0.8125rem;
     letter-spacing: 1.6px;
     font-weight: 500;
     display: flex;
@@ -234,7 +236,7 @@ input {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    font-size: 9px;
+    font-size: 0.8125rem;
     padding: 5px 8px;
     border-radius: 5px;
     white-space: nowrap;
@@ -316,7 +318,7 @@ input {
     color: #8a97aa;
 }
 .brand-reg {
-    font-size: 9px;
+    font-size: 0.8125rem;
     align-self: flex-start;
     margin-left: -5px;
     margin-top: 3px;
@@ -349,7 +351,7 @@ input {
     color: #fff;
     border-radius: 5px;
     padding: 14px;
-    font-size: 13px;
+    font-size: 1.0625rem;
 }
 .skip-link:focus {
     top: 12px;
@@ -366,5 +368,5 @@ input {
     color: #6084b6;
     font-family: 'Manrope', sans-serif;
     font-weight: 600;
-    font-size: 10px;
+    font-size: 0.875rem;
 }

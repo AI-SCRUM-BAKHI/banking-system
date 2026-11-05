@@ -16,7 +16,12 @@ class ServiceTokenFilterTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"/api/v1/transactions/evaluate", "/api/v1/fraud-transactions"})
+  @ValueSource(
+      strings = {
+        "/api/v1/transactions/evaluate",
+        "/api/v1/fraud-transactions",
+        "/api/v1/transactions"
+      })
   void acceptsTrustedServiceToken(String path) throws Exception {
     MockHttpServletRequest request = new MockHttpServletRequest("POST", path);
     request.setServletPath(path);

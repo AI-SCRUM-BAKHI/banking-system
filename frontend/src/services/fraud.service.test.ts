@@ -19,3 +19,15 @@ it('sends supported server pagination and filters and unwraps the backend envelo
     expect(await getFraudTransactions(filters)).toEqual(page)
     expect(get).toHaveBeenCalledWith('/fraud-transactions', { params: filters })
 })
+
+it('loads stored source IP intelligence without generating addresses or changing labels', async () => {
+    const insights = {
+        totalTransactions: 3,
+        transactionsWithIp: 2,
+        sourceFraudTransactions: 2,
+        groups: [{ ip: '192.0.2.54', count: 2, sourceFraud: 2, confirmed: 0 }],
+    }
+    const get = vi.spyOn(apiClient, 'get').mockResolvedValue({ data: { success: true, data: insights } })
+    expect(await getIpIntelligence()).toEqual(insights)
+    expect(get).toHaveBeenCalledWith('/fraud-transactions/ip-intelligence')
+})

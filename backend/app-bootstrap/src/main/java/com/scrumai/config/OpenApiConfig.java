@@ -37,7 +37,7 @@ public class OpenApiConfig {
                         .in(SecurityScheme.In.HEADER)
                         .name("X-Service-Token")
                         .description(
-                            "Use APP_SERVICE_TOKEN from backend/.env for transaction evaluation and fraud ingest.")))
+                            "Use APP_SERVICE_TOKEN from backend/.env for source transactions, evaluation and fraud ingest.")))
         .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
   }
 
@@ -51,7 +51,8 @@ public class OpenApiConfig {
             "/api/v1/auth/logout",
             "/api/v1/system/ping");
     Set<String> servicePaths =
-        Set.of("/api/v1/fraud-transactions", "/api/v1/transactions/evaluate");
+        Set.of(
+            "/api/v1/fraud-transactions", "/api/v1/transactions", "/api/v1/transactions/evaluate");
     return api -> {
       if (api.getPaths() == null) {
         return;

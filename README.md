@@ -30,7 +30,7 @@ docker compose -f infra/docker-compose.yml up --build
 
 Open the frontend at http://localhost:5173. The backend API is at http://localhost:8080 and Swagger is at http://localhost:8080/swagger-ui.html. Stop both containers with `Ctrl+C`, or run `docker compose -f infra/docker-compose.yml down` in another terminal.
 
-The frontend API URL is compiled into the static bundle during image build. To use a different API host, set `VITE_API_BASE_URL` in the shell before running Compose and rebuild the image.
+The frontend defaults to `/api/v1` on its own origin. Its Nginx container forwards API and Swagger requests to `backend:8080`, so the same image works on localhost and the public server. The API URL is compiled into the bundle during image build. To call a separate API host directly, set `VITE_API_BASE_URL` before building and allow the frontend origin in `APP_CORS_ALLOWED_ORIGINS`.
 
 ## Run locally
 
@@ -103,6 +103,7 @@ The API is stateless. Login returns a 15 minute access token and a seven day ref
 | User management | `/api/v1/users/**` | `ADMIN`, except `PATCH /api/v1/users/me/password` is available to the signed-in user |
 | Fraud investigation | `/api/v1/fraud-transactions/**` | `ADMIN` and `BANK_USER` |
 | Fraud ingest | `POST /api/v1/fraud-transactions` | Trusted producer with `X-Service-Token: <APP_SERVICE_TOKEN>` |
+| Source transaction ingest | `POST /api/v1/transactions` | Trusted producer; saves `PENDING` for background evaluation using `X-Service-Token` |
 | Rule-based fraud detection | `POST /api/v1/transactions/evaluate` | Trusted producer with `X-Service-Token: <APP_SERVICE_TOKEN>` |
 | AI fraud analysis | `GET` / `POST /api/v1/transactions/{transactionRef}/ai-analysis` | JWT bearer token; `ADMIN` and `BANK_USER` |
 
@@ -122,3 +123,9 @@ reference whose evaluation returned `decision: FRAUD`. Matching investigation
 cases also have a **Phân tích AI** tab. Demo mode displays a labeled synthetic
 example without calling OpenRouter. See the [setup and demo guide](docs/ai-fraud-analysis.md)
 for the full flow, prerequisites and troubleshooting.
+### Background transaction scanner
+
+The optional scanner evaluates source rows in `transactions` and creates fraud cases
+without calling the POST APIs. It is disabled by default. See
+[background transaction evaluation](docs/transaction-scan.md) for V5 rollout,
+coverage requirements, settings and retry/reset procedures.

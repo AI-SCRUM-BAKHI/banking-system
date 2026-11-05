@@ -17,8 +17,17 @@ import {
 } from 'lucide-react'
 import { Brand, Pill, Reveal } from '../components/ui'
 import { RadarScene } from '../components/NetworkScene'
+import type { CurrentUser } from '../types/auth.types'
 
-export function LandingPage({ onDemo }: { onDemo: () => void }) {
+export function LandingPage({
+    onDemo,
+    account,
+    onOpenWorkspace,
+}: {
+    onDemo: () => void
+    account: CurrentUser | null
+    onOpenWorkspace: () => void
+}) {
     const [paused, setPaused] = useState(false)
     return (
         <div className={'landing ' + (paused ? 'motion-paused' : '')}>
@@ -34,9 +43,18 @@ export function LandingPage({ onDemo }: { onDemo: () => void }) {
                     </Link>
                 </nav>
                 <div>
-                    <Link className="nav-login" to="/login">
-                        Đăng nhập
-                    </Link>
+                    {account ? (
+                        <>
+                            <span className="nav-account">{account.fullName}</span>
+                            <button className="nav-login" onClick={onOpenWorkspace}>
+                                Vào workspace
+                            </button>
+                        </>
+                    ) : (
+                        <Link className="nav-login" to="/login">
+                            Đăng nhập
+                        </Link>
+                    )}
                     <button className="btn small dark" onClick={onDemo}>
                         Khám phá demo <ArrowUpRight size={15} />
                     </button>
@@ -260,9 +278,16 @@ export function LandingPage({ onDemo }: { onDemo: () => void }) {
                         <button className="btn primary" onClick={onDemo}>
                             Bắt đầu khám phá <ArrowUpRight size={17} />
                         </button>
-                        <Link to="/login">
-                            Đã có tài khoản? Đăng nhập <ChevronRight size={13} />
-                        </Link>
+                        {account ? (
+                            <button className="text-button account-return" onClick={onOpenWorkspace}>
+                                Quay về workspace của {account.username}
+                                <ChevronRight size={13} />
+                            </button>
+                        ) : (
+                            <Link to="/login">
+                                Đã có tài khoản? Đăng nhập <ChevronRight size={13} />
+                            </Link>
+                        )}
                     </div>
                     <div className="cta-orbit" />
                 </Reveal>

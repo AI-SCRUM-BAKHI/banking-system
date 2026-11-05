@@ -147,7 +147,7 @@ export function FlowGraph({
                             x={(from.x + to.x) / 2}
                             y={(from.y + to.y) / 2 + 4}
                             textAnchor="middle"
-                            fontSize="9"
+                            fontSize="11"
                             fill="#65718a"
                         >
                             {shortMoney(edge.amount)}
@@ -180,10 +180,10 @@ export function FlowGraph({
                             stroke={i === 1 ? '#d8e8ff' : '#426ba8'}
                             fill="none"
                         />
-                        <text x={pos.x} y={pos.y + 47} textAnchor="middle" fontSize="11" fill="#344664">
+                        <text x={pos.x} y={pos.y + 47} textAnchor="middle" fontSize="13" fill="#344664">
                             {node.masked}
                         </text>
-                        <text x={pos.x} y={pos.y + 62} textAnchor="middle" fontSize="8" fill="#8893a5">
+                        <text x={pos.x} y={pos.y + 62} textAnchor="middle" fontSize="10" fill="#8893a5">
                             {node.customerName || 'Tài khoản'}
                         </text>
                     </g>

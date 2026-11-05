@@ -23,6 +23,10 @@ jobs:
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
       - run: bash ./gradlew --no-daemon clean qualityGate :app-bootstrap:bootJar
+      - name: Verify deployment readiness handling
+        run: |
+          bash -n ../infra/deploy.sh
+          python3 -m unittest discover -s ../infra/tests -p 'test_*.py' -q
 
   frontend-ci:
     name: Frontend CI
@@ -73,12 +77,5 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
 
-            echo "🐳 Rebuilding and starting containers with Docker Compose..."
-            docker compose -f infra/docker-compose.yml up -d --build
-
-            echo "🧹 Pruning old dangling images..."
-            docker image prune -f
-
-            echo "✅ Deployment completed successfully!"
-            docker compose -f infra/docker-compose.yml ps
+            bash infra/deploy.sh
 

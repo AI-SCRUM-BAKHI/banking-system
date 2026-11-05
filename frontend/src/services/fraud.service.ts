@@ -3,6 +3,7 @@ import type { ApiResponse } from '../types/api.types'
 import type {
     AiFraudAnalysis,
     DashboardSummary,
+    IpIntelligence,
     FraudDetail,
     FraudFilters,
     FraudSummary,
@@ -59,4 +60,8 @@ export async function reviewCase(
             { status },
         )
     ).data.data
+}
+
+export async function getIpIntelligence(): Promise<IpIntelligence> {
+    return (await apiClient.get<ApiResponse<IpIntelligence>>('/fraud-transactions/ip-intelligence')).data.data
 }

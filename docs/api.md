@@ -78,14 +78,14 @@ Ingest **all successful transfers**, including normal transactions, through this
 endpoint in globally nondecreasing `transactionTime` order. Backfill history first,
 before submitting newer transactions. A database row lock serializes evaluation
 across application instances. Same-reference retries with equivalent normalized
-transaction data return the original result/version before checking chronology;
+transaction data return the latest stored result/version before checking chronology;
 changed data or a new late transaction returns HTTP 409. Failed evaluation rolls
 back history, audit, result, and watermark together.
 
 Migration `V4__create_risk_evaluation_context.sql` adds:
 
-- `risk_transfer_history`: complete successful-transfer input ledger, immutable
-  original result, and audit JSON containing config, context bounds, per-rule
+- `risk_transfer_history`: append-only evaluation ledger with input snapshots,
+  results, and audit JSON containing config, context bounds, per-rule
   status/features/evidence, and stable `riskEventId` hashes.
 - `risk_ingest_state`: global ordering and serialization lock.
 - `risk_account_coverage`: trusted, account-specific contiguous coverage intervals
@@ -212,3 +212,47 @@ Provider response bodies and API keys are not returned to callers. Failed
 generation is not saved; retry POST to try again. See
 [AI fraud analysis setup](ai-fraud-analysis.md) for environment configuration,
 frontend behavior and a live demo checklist.
+## Background source evaluation
+
+V8/V9 use `risk_transfer_history` for both evaluators, with no separate
+`transaction_evaluations` table. Raw CSV and ground-truth labels are stored in
+`transactions.source_data` and `transactions.source_label`; structured CSV columns
+(bank, device, IP, etc.) and `customer_id` are populated on the same source row.
+The canonical posting timestamp is `posted_at`; the empty/redundant legacy
+`posting_datetime` alias is removed. Evaluation history and reviewed cases are preserved.
+
+The optional background scanner evaluates rows in `transactions` and creates fraud
+cases internally. Existing POST endpoints remain available with their current
+service-token authentication and behavior. See [transaction-scan.md](transaction-scan.md)
+for migration, source contracts, coverage, configuration and manual reevaluation.
+
+### Enqueue a source transaction
+
+`POST /api/v1/transactions` requires `X-Service-Token: <APP_SERVICE_TOKEN>`.
+On Swagger, authorize the `serviceToken` scheme using the raw token.
+
+```json
+{
+  "transactionRef": "SOURCE-20261104-001",
+  "fromAccountRef": "SIM000000071",
+  "fromAccountMasked": "****0071",
+  "fromCustomerName": "Khach hang SIM000000071",
+  "toAccountRef": "SIM000000017",
+  "toAccountMasked": "****0017",
+  "toCustomerName": "Khach hang SIM000000017",
+  "amount": 19135000,
+  "currency": "VND",
+  "transactionTime": "2026-10-27T07:17:00Z"
+}
+```
+
+`postedAt` is optional and must be the actual posting time with an explicit offset,
+at or after `transactionTime` and no later than the time of submission. Optional
+customer names may be omitted. Only positive whole VND amounts are accepted, using
+the scanner's v1 limits. Both account references and masked account labels are required.
+
+HTTP 201 returns `data.transactionRef`, `data.processingStatus` (`PENDING`) and
+`data.createdAt`. Duplicate references return 409; invalid requests return 400.
+Caller-supplied risk scores, rule hits, chains and processing state are ignored.
+The source is committed before evaluation; the scanner later computes its result
+and creates a fraud case when appropriate. If scanning is disabled, it stays queued.

@@ -39,12 +39,12 @@
     margin: 15px 0 10px;
 }
 .modal > p {
-    font-size: 11px;
+    font-size: 0.9375rem;
     color: #7e9bbf;
     margin-bottom: 25px;
 }
 .modal > .eyebrow {
-    font-size: 7px;
+    font-size: 0.75rem;
     color: #93add1;
 }
 .form-modal-icon {
@@ -59,7 +59,7 @@
     margin-bottom: 25px;
 }
 .member-demo-note {
-    font-size: 9px;
+    font-size: 0.8125rem;
     line-height: 1.9;
     color: #a18c5d;
     background: #fcf8ee;
@@ -84,19 +84,19 @@
     padding: 33px 32px 22px;
 }
 .drawer-top .eyebrow {
-    font-size: 7px;
+    font-size: 0.75rem;
     color: #8aa4c7;
     letter-spacing: 1.4px;
 }
 .drawer-top h2 {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 21px;
+    font-size: 1.4375rem;
     color: #6486b2;
     letter-spacing: -0.6px;
     margin-top: 18px;
 }
 .drawer-top p {
-    font-size: 9px;
+    font-size: 0.8125rem;
     color: #8ea7c7;
     margin-top: 11px;
 }
@@ -117,7 +117,7 @@
     align-items: center;
     gap: 8px;
     padding: 0 0 14px;
-    font-size: 10px;
+    font-size: 0.875rem;
     border-bottom: 2px solid transparent;
     color: #8ba5c8;
     background: none;
@@ -133,7 +133,7 @@
 .case-amount > span {
     display: block;
     font:
-        7px 'IBM Plex Mono',
+        0.75rem 'IBM Plex Mono',
         monospace;
     color: #88a3c6;
     letter-spacing: 1.1px;
@@ -148,7 +148,7 @@
     margin: 13px 0 11px;
 }
 .case-amount small {
-    font-size: 9px;
+    font-size: 0.8125rem;
     color: #8ca7ca;
 }
 .account-transfer {
@@ -177,14 +177,14 @@
 .account-transfer small {
     display: block;
     font:
-        6px 'IBM Plex Mono',
+        0.6875rem 'IBM Plex Mono',
         monospace;
     color: #90a9ca;
     letter-spacing: 0.7px;
 }
 .account-transfer b {
     font:
-        500 15px 'IBM Plex Mono',
+        500 1.125rem 'IBM Plex Mono',
         monospace;
     color: #7694bd;
     display: block;
@@ -192,7 +192,7 @@
 }
 .account-transfer > div > span:last-child {
     display: block;
-    font-size: 8px;
+    font-size: 0.75rem;
     color: #8ea8c9;
     margin-top: 8px;
 }
@@ -213,19 +213,19 @@
     color: #caa28b;
 }
 .score-explainer h3 {
-    font-size: 12px;
+    font-size: 1rem;
     font-weight: 500;
     color: #a3816e;
 }
 .score-explainer b {
     margin-left: auto;
     font:
-        500 23px 'Manrope',
+        500 1.5625rem 'Manrope',
         sans-serif;
     color: #ba9176;
 }
 .score-explainer b small {
-    font-size: 10px;
+    font-size: 0.875rem;
     color: #c1a891;
     margin-left: 3px;
 }
@@ -244,12 +244,12 @@
     transform-origin: left;
 }
 .score-explainer p {
-    font-size: 10px;
+    font-size: 0.875rem;
     color: #a18f7e;
 }
 .score-explainer > small {
     display: block;
-    font-size: 8px;
+    font-size: 0.75rem;
     line-height: 1.9;
     color: #b09b85;
     margin-top: 12px;
@@ -258,7 +258,7 @@
     padding: 0 32px 30px;
 }
 .rule-hits h3 {
-    font-size: 12px;
+    font-size: 1rem;
     color: #7896bc;
     font-weight: 500;
     display: flex;
@@ -271,7 +271,7 @@
     color: #a2b7d3;
     padding: 2px 6px;
     border-radius: 4px;
-    font-size: 9px;
+    font-size: 0.8125rem;
 }
 .rule-hits article {
     display: flex;
@@ -289,18 +289,18 @@
     display: flex;
 }
 .rule-hits article b {
-    font-size: 11px;
+    font-size: 0.9375rem;
     font-weight: 500;
     color: #7291bb;
 }
 .rule-hits article code {
     display: block;
-    font-size: 7px;
+    font-size: 0.75rem;
     color: #8da8cc;
     margin: 8px 0;
 }
 .rule-hits article p {
-    font-size: 9px;
+    font-size: 0.8125rem;
     color: #8da6c7;
     line-height: 1.9;
 }
@@ -312,7 +312,7 @@
     padding: 5px 7px;
     white-space: nowrap;
     font:
-        10px 'IBM Plex Mono',
+        0.875rem 'IBM Plex Mono',
         monospace;
 }
 .drawer-bottom {
@@ -325,7 +325,7 @@
     display: flex;
     gap: 8px;
     align-items: center;
-    font-size: 9px;
+    font-size: 0.8125rem;
     color: #8ca7cb;
     margin-bottom: 20px;
 }
@@ -334,7 +334,7 @@
     gap: 10px;
 }
 .drawer-bottom .btn {
-    font-size: 10px;
+    font-size: 0.875rem;
     padding: 11px 15px;
 }
 .drawer-graph {
@@ -520,7 +520,7 @@
     background: #1a3c32;
     color: #d6ebdf;
     box-shadow: 0 8px 30px #142e3c26;
-    font-size: 11px;
+    font-size: 0.9375rem;
     animation: riseIn 0.25s var(--ease);
 }
 .not-found {
@@ -541,7 +541,7 @@
     color: #6b8cb5;
 }
 .not-found p {
-    font-size: 12px;
+    font-size: 1rem;
     color: #9bafc9;
 }
 .not-found .eyebrow {

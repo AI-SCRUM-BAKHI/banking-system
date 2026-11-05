@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { demoDetail, demoGraph, demoList, demoSummary } from './demo'
-import { getDetail, getFraudTransactions, getGraph, getSummary } from '../services/fraud.service'
+import { getDetail, getFraudTransactions, getGraph, getSummary, getIpIntelligence } from '../services/fraud.service'
 import type { FraudFilters, Mode } from '../types/fraud.types'
 export function useCases(mode: Mode, filters: FraudFilters = {}, enabled = true) {
     return useQuery({
@@ -28,4 +28,8 @@ export function useGraph(mode: Mode, id: string) {
         queryFn: () => (mode === 'demo' ? Promise.resolve(demoGraph(id)) : getGraph(id)),
         enabled: !!id,
     })
+}
+
+export function useIpIntelligence(enabled: boolean) {
+    return useQuery({ queryKey: ['ip-intelligence', 'live'], queryFn: getIpIntelligence, enabled })
 }

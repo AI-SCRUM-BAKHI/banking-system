@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 const envSchema = z.object({
-    VITE_API_BASE_URL: z.string().url().default('http://localhost:8080/api/v1'),
+    VITE_API_BASE_URL: z.union([z.literal('/api/v1'), z.string().url()]).default('/api/v1'),
     VITE_APP_NAME: z.string().min(1).default('Banking Fraud Detection'),
 })
 

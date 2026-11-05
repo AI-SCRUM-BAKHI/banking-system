@@ -21,50 +21,80 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HexFormat;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class RiskScoreEngine {
   public static final String VERSION = "rule-score-v1";
-  public static final int FRAUD_THRESHOLD = 60;
-  private static final Duration MONTH = Duration.ofDays(30);
-  private static final BigDecimal LOWER_RATIO = new BigDecimal("0.95");
-  private static final Map<String, Integer> WEIGHTS =
-      Map.of(
-          "AMOUNT_SPIKE", 35,
-          "NEW_BENEFICIARY_LARGE", 50,
-          "UNUSUAL_HOUR", 25,
-          "FREQUENCY_SPIKE", 45,
-          "STRUCTURED_SPLIT", 55,
-          "RAPID_PASS_THROUGH", 65,
-          "MULTI_ACCOUNT_FLOW", 80);
+  public static final String V2 = "rule-score-v2";
+  public static final String V3_RECALL = "rule-score-v3-recall";
   private static final List<List<String>> GROUPS =
       List.of(
           List.of("AMOUNT_SPIKE", "NEW_BENEFICIARY_LARGE"),
           List.of("FREQUENCY_SPIKE", "STRUCTURED_SPLIT"),
           List.of("RAPID_PASS_THROUGH", "MULTI_ACCOUNT_FLOW"),
           List.of("UNUSUAL_HOUR"));
+  private final String version;
+  private final boolean enhanced;
+  private final boolean highRecall;
+  private final Map<String, Integer> weights;
+  private final RiskRuleConfiguration config;
+  private final Duration baselineDuration;
+
+  public RiskScoreEngine() {
+    this(VERSION);
+  }
+
+  public RiskScoreEngine(String version) {
+    this(new RiskRuleConfiguration(version));
+  }
+
+  @Autowired
+  public RiskScoreEngine(RiskRuleConfiguration config) {
+    this.config = config;
+    version = config.version();
+    enhanced = !VERSION.equals(version);
+    highRecall = V3_RECALL.equals(version);
+    baselineDuration = Duration.ofDays(config.integer("BASELINE_DAYS"));
+    weights =
+        Map.of(
+            "AMOUNT_SPIKE", config.integer("AMOUNT_SPIKE_SCORE"),
+            "NEW_BENEFICIARY_LARGE", config.integer("NEW_BENEFICIARY_SCORE"),
+            "UNUSUAL_HOUR", config.integer("UNUSUAL_HOUR_SCORE"),
+            "FREQUENCY_SPIKE", config.integer("FREQUENCY_SCORE"),
+            "STRUCTURED_SPLIT", config.integer("SPLIT_SCORE"),
+            "RAPID_PASS_THROUGH", config.integer("RAPID_SCORE"),
+            "MULTI_ACCOUNT_FLOW", config.integer("MULTI_SCORE"));
+  }
 
   public Map<String, Object> configuration() {
-    return Map.ofEntries(
-        Map.entry("ruleVersion", VERSION),
-        Map.entry("fraudThreshold", FRAUD_THRESHOLD),
-        Map.entry("weights", WEIGHTS),
-        Map.entry("groups", GROUPS),
-        Map.entry("baseline", "[t-30d,t); min 20; exact median; amount > 8*median"),
-        Map.entry("hour", "Asia/Ho_Chi_Minh [02:00,04:00)"),
-        Map.entry("frequency", "(t-600s,t]; count >= 12"),
-        Map.entry("split", "last 9 in (t-3600s,t]; equal VND; gaps [300,420]s; prior receiver 30d"),
-        Map.entry(
-            "rapid", "latest posting [t-120s,t); delay [60,120]s; ratio [0.95,1]; 3 accounts"),
-        Map.entry(
-            "multi",
-            "all inbound (t-600s,t); all outbound (max posting,t]; 5 sources; 2 targets; disjoint; ratio [0.95,1]"),
-        Map.entry("score", "sum group maxima; cap 100; levels 30/60/80"));
+    return Map.of(
+        "ruleVersion",
+        version,
+        "fraudThreshold",
+        config.integer("THRESHOLD"),
+        "weights",
+        weights,
+        "groups",
+        GROUPS,
+        "parameters",
+        config.snapshot(),
+        "hourTimezone",
+        "Asia/Ho_Chi_Minh",
+        "splitEqualAmountFiltering",
+        highRecall,
+        "rapidRequiresAmountSpike",
+        enhanced && !highRecall,
+        "rapidLatestValidCredit",
+        highRecall,
+        "score",
+        "sum group maxima; cap 100; levels 30/60/80");
   }
 
   public Evaluation evaluate(Transfer current, Context context) {
@@ -74,7 +104,8 @@ public class RiskScoreEngine {
     rules.add(
         rule(
             "UNUSUAL_HOUR",
-            hour >= 2 && hour < 4,
+            hour >= config.integer("UNUSUAL_HOUR_START")
+                && hour < config.integer("UNUSUAL_HOUR_END"),
             current,
             List.of(current),
             Map.of("localHour", hour)));
@@ -90,12 +121,12 @@ public class RiskScoreEngine {
               .filter(r -> r.status().equals("MATCHED") && group.contains(r.ruleCode()))
               .map(RuleAudit::ruleCode)
               .toList();
-      String winner = matched.stream().max(Comparator.comparingInt(WEIGHTS::get)).orElse(null);
+      String winner = matched.stream().max(Comparator.comparingInt(weights::get)).orElse(null);
       for (String code : matched) {
         triggered.add(
             new TriggeredRule(
                 code,
-                code.equals(winner) ? WEIGHTS.get(code) : 0,
+                code.equals(winner) ? weights.get(code) : 0,
                 code.equals(winner) ? null : winner));
       }
     }
@@ -106,7 +137,9 @@ public class RiskScoreEngine {
             .toList();
     int score = Math.min(100, triggered.stream().mapToInt(TriggeredRule::scoreContribution).sum());
     Boolean fraud =
-        score >= FRAUD_THRESHOLD ? Boolean.TRUE : missing.isEmpty() ? Boolean.FALSE : null;
+        score >= config.integer("THRESHOLD")
+            ? Boolean.TRUE
+            : missing.isEmpty() ? Boolean.FALSE : null;
     return new Evaluation(
         new Result(
             current.transactionRef(),
@@ -117,8 +150,8 @@ public class RiskScoreEngine {
             score,
             level(score),
             missing.isEmpty() ? "COMPLETE" : "PARTIAL",
-            FRAUD_THRESHOLD,
-            VERSION,
+            config.integer("THRESHOLD"),
+            version,
             List.copyOf(triggered),
             missing),
         List.copyOf(rules));
@@ -136,11 +169,15 @@ public class RiskScoreEngine {
         ctx.outbound().stream()
             .filter(
                 h ->
-                    !h.transactionTime().isBefore(t.minus(MONTH))
+                    !h.transactionTime().isBefore(t.minus(baselineDuration))
                         && h.transactionTime().isBefore(t))
             .toList();
-    if (!outbound(ctx, t.minus(MONTH), t) || baseline.size() < 20) {
-      String reason = "Requires complete outbound coverage and at least 20 baseline samples";
+    if (!outbound(ctx, t.minus(baselineDuration), t)
+        || baseline.size() < config.integer("BASELINE_MIN_COUNT")) {
+      String reason =
+          "Requires complete outbound coverage and at least "
+              + config.integer("BASELINE_MIN_COUNT")
+              + " baseline samples";
       rules.add(missing("AMOUNT_SPIKE", reason));
       rules.add(missing("NEW_BENEFICIARY_LARGE", reason));
       return;
@@ -151,7 +188,8 @@ public class RiskScoreEngine {
         n % 2 == 1
             ? amounts.get(n / 2)
             : amounts.get(n / 2 - 1).add(amounts.get(n / 2)).divide(BigDecimal.valueOf(2));
-    boolean spike = tx.amountVnd().compareTo(median.multiply(BigDecimal.valueOf(8))) > 0;
+    boolean spike =
+        tx.amountVnd().compareTo(median.multiply(config.decimal("AMOUNT_SPIKE_MULTIPLIER"))) > 0;
     boolean known =
         baseline.stream().anyMatch(h -> h.receiverAccountId().equals(tx.receiverAccountId()));
     Map<String, Object> features =
@@ -167,20 +205,24 @@ public class RiskScoreEngine {
     List<Transfer> evidence = new ArrayList<>(baseline);
     evidence.add(tx);
     rules.add(rule("AMOUNT_SPIKE", spike, tx, evidence, features));
-    rules.add(rule("NEW_BENEFICIARY_LARGE", spike && !known, tx, evidence, features));
+    boolean newLarge =
+        tx.amountVnd().compareTo(median.multiply(config.decimal("NEW_BENEFICIARY_MULTIPLIER"))) > 0;
+    rules.add(rule("NEW_BENEFICIARY_LARGE", newLarge && !known, tx, evidence, features));
   }
 
   private void frequency(Transfer tx, Context ctx, List<RuleAudit> rules) {
-    Instant start = tx.transactionTime().minusSeconds(600);
+    int window = config.integer("FREQUENCY_WINDOW_SECONDS");
+    Instant start = tx.transactionTime().minusSeconds(window);
     if (!outbound(ctx, start, tx.transactionTime())) {
-      rules.add(missing("FREQUENCY_SPIKE", "Requires complete 600-second outbound coverage"));
+      rules.add(
+          missing("FREQUENCY_SPIKE", "Requires complete " + window + "-second outbound coverage"));
       return;
     }
     List<Transfer> evidence = rolling(tx, ctx, start);
     rules.add(
         rule(
             "FREQUENCY_SPIKE",
-            evidence.size() >= 12,
+            evidence.size() >= config.integer("FREQUENCY_MIN_COUNT"),
             tx,
             evidence,
             Map.of("outboundCount", evidence.size())));
@@ -188,32 +230,39 @@ public class RiskScoreEngine {
 
   private void split(Transfer tx, Context ctx, List<RuleAudit> rules) {
     Instant t = tx.transactionTime();
-    if (!outbound(ctx, t.minusSeconds(3600), t)) {
-      rules.add(missing("STRUCTURED_SPLIT", "Requires complete one-hour outbound coverage"));
+    if (!outbound(ctx, t.minusSeconds(config.integer("SPLIT_WINDOW_SECONDS")), t)) {
+      rules.add(
+          missing(
+              "STRUCTURED_SPLIT",
+              "Requires complete "
+                  + config.integer("SPLIT_WINDOW_SECONDS")
+                  + "-second outbound coverage"));
       return;
     }
     // List order is ingest order; stable sorting preserves it for equal timestamps.
     List<Transfer> pair =
-        rolling(tx, ctx, t.minusSeconds(3600)).stream()
+        rolling(tx, ctx, t.minusSeconds(config.integer("SPLIT_WINDOW_SECONDS"))).stream()
             .filter(h -> h.receiverAccountId().equals(tx.receiverAccountId()))
+            .filter(h -> !highRecall || h.amountVnd().compareTo(tx.amountVnd()) == 0)
             .sorted(Comparator.comparing(Transfer::transactionTime))
             .toList();
-    List<Transfer> group = pair.subList(Math.max(0, pair.size() - 9), pair.size());
-    boolean matches = group.size() == 9;
+    int required = config.integer("SPLIT_MIN_COUNT");
+    List<Transfer> group = pair.subList(Math.max(0, pair.size() - required), pair.size());
+    boolean matches = group.size() == required;
     for (int i = 0; matches && i < group.size(); i++) {
       matches = group.get(i).amountVnd().compareTo(tx.amountVnd()) == 0;
       if (i > 0) {
         Duration gap =
             Duration.between(group.get(i - 1).transactionTime(), group.get(i).transactionTime());
         matches &=
-            gap.compareTo(Duration.ofSeconds(300)) >= 0
-                && gap.compareTo(Duration.ofSeconds(420)) <= 0;
+            gap.compareTo(Duration.ofSeconds(config.integer("SPLIT_MIN_GAP_SECONDS"))) >= 0
+                && gap.compareTo(Duration.ofSeconds(config.integer("SPLIT_MAX_GAP_SECONDS"))) <= 0;
       }
     }
     List<Transfer> evidence = new ArrayList<>(group);
     if (matches) {
       Instant first = group.getFirst().transactionTime();
-      if (!outbound(ctx, first.minus(MONTH), first)) {
+      if (!outbound(ctx, first.minus(baselineDuration), first)) {
         rules.add(
             missing("STRUCTURED_SPLIT", "Requires receiver history coverage before first split"));
         return;
@@ -223,30 +272,63 @@ public class RiskScoreEngine {
               .filter(
                   h ->
                       h.receiverAccountId().equals(tx.receiverAccountId())
-                          && !h.transactionTime().isBefore(first.minus(MONTH))
+                          && !h.transactionTime().isBefore(first.minus(baselineDuration))
                           && h.transactionTime().isBefore(first))
               .toList();
       matches = !prior.isEmpty();
       evidence.addAll(prior);
     }
-    rules.add(rule("STRUCTURED_SPLIT", matches, tx, evidence, Map.of("groupCount", group.size())));
+    Map<String, Object> features =
+        highRecall
+            ? Map.of(
+                "groupCount",
+                group.size(),
+                "patternTransactionRefs",
+                group.stream().map(Transfer::transactionRef).toList())
+            : Map.of("groupCount", group.size());
+    rules.add(rule("STRUCTURED_SPLIT", matches, tx, evidence, features));
   }
 
   private void rapid(Transfer tx, Context ctx, List<RuleAudit> rules) {
     Instant t = tx.transactionTime();
-    if (!inbound(ctx, t.minusSeconds(120), t)) {
+    if (highRecall) {
+      rapidRecall(tx, ctx, rules);
+      return;
+    }
+    if (!inbound(ctx, t.minusSeconds(config.integer("RAPID_MAX_DELAY_SECONDS")), t)) {
       rules.add(
           missing(
               "RAPID_PASS_THROUGH",
-              "Requires complete 120-second posting coverage and posting data"));
+              "Requires complete "
+                  + config.integer("RAPID_MAX_DELAY_SECONDS")
+                  + "-second posting coverage and posting data"));
       return;
+    }
+    if (enhanced) {
+      RuleAudit amount =
+          rules.stream().filter(r -> r.ruleCode().equals("AMOUNT_SPIKE")).findFirst().orElseThrow();
+      if (amount.status().equals("NOT_EVALUATED")) {
+        rules.add(
+            missing(
+                "RAPID_PASS_THROUGH",
+                "Requires complete "
+                    + config.integer("BASELINE_MIN_COUNT")
+                    + "-sample outbound baseline for flow anomaly"));
+        return;
+      }
+      if (!amount.status().equals("MATCHED")) {
+        rules.add(
+            rule("RAPID_PASS_THROUGH", false, tx, List.of(tx), Map.of("abnormalAmount", false)));
+        return;
+      }
     }
     Transfer incoming =
         ctx.inbound().stream()
             .filter(
                 h ->
                     h.postedAt() != null
-                        && !h.postedAt().isBefore(t.minusSeconds(120))
+                        && !h.postedAt()
+                            .isBefore(t.minusSeconds(config.integer("RAPID_MAX_DELAY_SECONDS")))
                         && h.postedAt().isBefore(t))
             .sorted(
                 Comparator.comparing(Transfer::postedAt)
@@ -259,11 +341,15 @@ public class RiskScoreEngine {
     if (incoming != null) {
       Duration delay = Duration.between(incoming.postedAt(), t);
       matches =
-          delay.compareTo(Duration.ofSeconds(60)) >= 0
-              && delay.compareTo(Duration.ofSeconds(120)) <= 0
+          delay.compareTo(Duration.ofSeconds(config.integer("RAPID_MIN_DELAY_SECONDS"))) >= 0
+              && delay.compareTo(Duration.ofSeconds(config.integer("RAPID_MAX_DELAY_SECONDS"))) <= 0
               && !incoming.senderAccountId().equals(tx.receiverAccountId())
               && !incoming.senderAccountId().equals(tx.senderAccountId())
-              && ratio(tx.amountVnd(), incoming.amountVnd());
+              && withinRatio(
+                  tx.amountVnd(),
+                  incoming.amountVnd(),
+                  config.decimal("RAPID_MIN_RATIO"),
+                  config.decimal("RAPID_MAX_RATIO"));
       features =
           Map.of(
               "postingDelay",
@@ -282,13 +368,64 @@ public class RiskScoreEngine {
             features));
   }
 
+  private void rapidRecall(Transfer tx, Context ctx, List<RuleAudit> rules) {
+    Instant t = tx.transactionTime();
+    if (!inbound(ctx, t.minusSeconds(config.integer("RAPID_MAX_DELAY_SECONDS")), t)) {
+      rules.add(
+          missing(
+              "RAPID_PASS_THROUGH",
+              "Requires complete "
+                  + config.integer("RAPID_MAX_DELAY_SECONDS")
+                  + "-second posting coverage and posting data"));
+      return;
+    }
+    Transfer incoming =
+        ctx.inbound().stream()
+            .filter(
+                h ->
+                    h.postedAt() != null
+                        && !h.postedAt()
+                            .isBefore(t.minusSeconds(config.integer("RAPID_MAX_DELAY_SECONDS")))
+                        && !h.postedAt()
+                            .isAfter(t.minusSeconds(config.integer("RAPID_MIN_DELAY_SECONDS")))
+                        && !h.senderAccountId().equals(tx.receiverAccountId())
+                        && !h.senderAccountId().equals(tx.senderAccountId())
+                        && withinRatio(
+                            tx.amountVnd(),
+                            h.amountVnd(),
+                            config.decimal("RAPID_MIN_RATIO"),
+                            config.decimal("RAPID_MAX_RATIO")))
+            .sorted(
+                Comparator.comparing(Transfer::postedAt)
+                    .reversed()
+                    .thenComparing(Transfer::transactionRef))
+            .findFirst()
+            .orElse(null);
+    rules.add(
+        rule(
+            "RAPID_PASS_THROUGH",
+            incoming != null,
+            tx,
+            incoming == null ? List.of(tx) : List.of(incoming, tx),
+            incoming == null
+                ? Map.of()
+                : Map.of(
+                    "postingDelay",
+                    Duration.between(incoming.postedAt(), t).toString(),
+                    "inboundAmountVnd",
+                    incoming.amountVnd(),
+                    "outboundAmountVnd",
+                    tx.amountVnd())));
+  }
+
   private void multi(Transfer tx, Context ctx, List<RuleAudit> rules) {
     Instant t = tx.transactionTime();
-    if (!inbound(ctx, t.minusSeconds(600), t) || !outbound(ctx, t.minusSeconds(600), t)) {
+    int window = config.integer("MULTI_WINDOW_SECONDS");
+    if (!inbound(ctx, t.minusSeconds(window), t) || !outbound(ctx, t.minusSeconds(window), t)) {
       rules.add(
           missing(
               "MULTI_ACCOUNT_FLOW",
-              "Requires complete 600-second inbound posting/outbound coverage"));
+              "Requires complete " + window + "-second inbound posting/outbound coverage"));
       return;
     }
     List<Transfer> incoming =
@@ -296,7 +433,7 @@ public class RiskScoreEngine {
             .filter(
                 h ->
                     h.postedAt() != null
-                        && h.postedAt().isAfter(t.minusSeconds(600))
+                        && h.postedAt().isAfter(t.minusSeconds(window))
                         && h.postedAt().isBefore(t))
             .toList();
     if (incoming.isEmpty()) {
@@ -313,10 +450,11 @@ public class RiskScoreEngine {
     BigDecimal in = sum(incoming);
     BigDecimal out = sum(outgoing);
     boolean matches =
-        sources.size() >= 5
-            && targets.size() >= 2
+        sources.size() >= config.integer("MULTI_MIN_SOURCES")
+            && targets.size() >= config.integer("MULTI_MIN_TARGETS")
             && Collections.disjoint(sources, targets)
-            && ratio(out, in);
+            && withinRatio(
+                out, in, config.decimal("MULTI_MIN_RATIO"), config.decimal("MULTI_MAX_RATIO"));
     List<Transfer> evidence = new ArrayList<>(incoming);
     evidence.addAll(outgoing);
     rules.add(
@@ -355,10 +493,11 @@ public class RiskScoreEngine {
     return transfers.stream().map(Transfer::amountVnd).reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 
-  private boolean ratio(BigDecimal outbound, BigDecimal inbound) {
+  private boolean withinRatio(
+      BigDecimal outbound, BigDecimal inbound, BigDecimal lower, BigDecimal upper) {
     // Cross multiplication avoids rounding a ratio across a decision boundary.
-    return outbound.compareTo(inbound.multiply(LOWER_RATIO)) >= 0
-        && outbound.compareTo(inbound) <= 0;
+    return outbound.compareTo(inbound.multiply(lower)) >= 0
+        && outbound.compareTo(inbound.multiply(upper)) <= 0;
   }
 
   private boolean outbound(Context ctx, Instant from, Instant through) {
@@ -383,6 +522,11 @@ public class RiskScoreEngine {
       Map<String, Object> features) {
     List<String> refs =
         evidence.stream().map(Transfer::transactionRef).distinct().sorted().toList();
+    if (highRecall
+        && Set.of("FREQUENCY_SPIKE", "RAPID_PASS_THROUGH", "MULTI_ACCOUNT_FLOW").contains(code)) {
+      features = new LinkedHashMap<>(features);
+      features.put("patternTransactionRefs", refs);
+    }
     return new RuleAudit(
         code,
         matched ? "MATCHED" : "NOT_MATCHED",
@@ -395,7 +539,7 @@ public class RiskScoreEngine {
   private String eventId(String code, String account, List<String> refs) {
     try {
       MessageDigest digest = MessageDigest.getInstance("SHA-256");
-      List<String> parts = new ArrayList<>(List.of(VERSION, code, account));
+      List<String> parts = new ArrayList<>(List.of(version, code, account));
       parts.addAll(refs);
       for (String part : parts) {
         byte[] bytes = part.getBytes(StandardCharsets.UTF_8);
