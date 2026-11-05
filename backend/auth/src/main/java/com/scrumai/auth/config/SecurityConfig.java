@@ -134,7 +134,10 @@ public class SecurityConfig {
                     .hasAnyRole("ADMIN", "BANK_USER")
                     .requestMatchers("/api/v1/users/**")
                     .hasRole("ADMIN")
-                    .requestMatchers("/api/v1/fraud-transactions/**", "/api/v1/auth/me")
+                    .requestMatchers(
+                        "/api/v1/fraud-transactions/**",
+                        "/api/v1/auth/me",
+                        "/api/v1/transactions/*/ai-analysis")
                     .hasAnyRole("ADMIN", "BANK_USER")
                     .anyRequest()
                     .denyAll())

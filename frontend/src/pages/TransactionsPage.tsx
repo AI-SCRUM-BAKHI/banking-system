@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Download, Search, SlidersHorizontal, X } from 'lucide-react'
+import { Download, Search, SlidersHorizontal, Sparkles, X } from 'lucide-react'
+import { AiAnalysisPanel } from '../components/AiAnalysisPanel'
 import { CaseTable } from '../components/CaseTable'
-import { ErrorState, Loading, Panel, Pagination } from '../components/ui'
+import { ErrorState, Loading, Modal, Panel, Pagination } from '../components/ui'
 import { useConsole } from '../lib/console-context'
 import { useCases } from '../lib/queries'
 import { errorMessage } from '../api/axios'
@@ -18,6 +19,8 @@ export function TransactionsPage() {
     const [from, setFrom] = useState('')
     const [to, setTo] = useState('')
     const [dates, setDates] = useState(false)
+    const [analysisRefInput, setAnalysisRefInput] = useState('')
+    const [analysisRef, setAnalysisRef] = useState('')
     useEffect(() => {
         const timer = setTimeout(() => {
             setSearch(keyword)
@@ -73,6 +76,37 @@ export function TransactionsPage() {
                     Xuất trang này
                 </button>
             </div>
+            {session.mode === 'live' && (
+                <form
+                    className="ai-ref-lookup"
+                    onSubmit={(event) => {
+                        event.preventDefault()
+                        setAnalysisRef(analysisRefInput.trim())
+                    }}
+                >
+                    <div>
+                        <label htmlFor="ai-transaction-ref">Phân tích theo mã giao dịch</label>
+                        <p>Tra cứu giao dịch đã đánh giá FRAUD, kể cả khi chưa tạo hồ sơ điều tra.</p>
+                    </div>
+                    <input
+                        id="ai-transaction-ref"
+                        value={analysisRefInput}
+                        onChange={(event) => setAnalysisRefInput(event.target.value)}
+                        placeholder="Ví dụ: TX-001"
+                        maxLength={80}
+                        required
+                    />
+                    <button type="submit" className="btn secondary small" disabled={!analysisRefInput.trim()}>
+                        <Sparkles size={15} />
+                        Xem phân tích AI
+                    </button>
+                </form>
+            )}
+            {analysisRef && (
+                <Modal title="Phân tích AI giao dịch" onClose={() => setAnalysisRef('')} className="ai-analysis-modal">
+                    <AiAnalysisPanel key={analysisRef} transactionRef={analysisRef} mode={session.mode} />
+                </Modal>
+            )}
             <Panel className="transactions-panel">
                 <div className="filters-bar">
                     <label className="search-input">

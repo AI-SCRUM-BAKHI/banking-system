@@ -1,6 +1,7 @@
 import { apiClient } from '../api/axios'
 import type { ApiResponse } from '../types/api.types'
 import type {
+    AiFraudAnalysis,
     DashboardSummary,
     FraudDetail,
     FraudFilters,
@@ -10,6 +11,24 @@ import type {
     RuleHit,
     TransactionGraph,
 } from '../types/fraud.types'
+
+export async function getAiAnalysis(transactionRef: string): Promise<AiFraudAnalysis> {
+    return (
+        await apiClient.get<ApiResponse<AiFraudAnalysis>>(
+            `/transactions/${encodeURIComponent(transactionRef)}/ai-analysis`,
+        )
+    ).data.data
+}
+
+export async function createAiAnalysis(transactionRef: string): Promise<AiFraudAnalysis> {
+    return (
+        await apiClient.post<ApiResponse<AiFraudAnalysis>>(
+            `/transactions/${encodeURIComponent(transactionRef)}/ai-analysis`,
+            undefined,
+            { timeout: 120_000 },
+        )
+    ).data.data
+}
 
 export async function getFraudTransactions(filters: FraudFilters): Promise<Page<FraudSummary>> {
     const response = await apiClient.get<ApiResponse<Page<FraudSummary>>>('/fraud-transactions', { params: filters })

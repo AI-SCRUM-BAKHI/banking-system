@@ -2,6 +2,24 @@ export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
 export type ReviewStatus = 'NEW' | 'REVIEWING' | 'CONFIRMED_FRAUD' | 'FALSE_POSITIVE'
 export type Mode = 'demo' | 'live'
 
+export interface AiFraudAnalysis {
+    fraudExplanation: {
+        summary: string
+        reasons: {
+            ruleCode: string
+            description: string
+            evidenceTransactionRefs: string[]
+        }[]
+    }
+    investigationRecommendations: {
+        priority: number
+        action: string
+        rationale: string
+        evidenceTransactionRefs: string[]
+        dataToCollect: string[]
+    }[]
+}
+
 export interface FraudSummary {
     id: string
     transactionRef: string
