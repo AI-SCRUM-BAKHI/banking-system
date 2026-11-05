@@ -128,6 +128,90 @@ posting. Posting updates to already evaluated transfers and late-event replay
 require a separate importer/reconciliation extension; retries cannot change an
 existing transfer. Prior online results remain unchanged after coverage advances.
 
+## AI fraud analysis
+
+Both endpoints require `Authorization: Bearer <accessToken>` for `ADMIN` or
+`BANK_USER`. A producer service token does not authorize AI analysis.
+`transactionRef` identifies a saved evaluation in `risk_transfer_history`, not
+the UUID of a fraud investigation case. References must be nonblank and at most
+80 characters. Use URL-safe references (for example letters, digits, hyphens
+and underscores). URL-encode references when building the route, but avoid
+slashes: the default security firewall rejects encoded slashes. The evaluation
+endpoint's existing reference contract is unchanged, so a legacy reference
+containing a slash cannot be accessed through this new path-based route.
+
+| Method and route | Behavior |
+| --- | --- |
+| `POST /api/v1/transactions/{transactionRef}/ai-analysis` | Return saved analysis, or synchronously call OpenRouter, validate and save it. No request body. Requires original `decision = FRAUD` and usable matched-rule evidence. |
+| `GET /api/v1/transactions/{transactionRef}/ai-analysis` | Return the saved analysis. Does not call OpenRouter or generate a result. |
+
+Both return HTTP 200 with the common success envelope. The `data` object has
+two business fields, illustrated below; identifiers and amounts in a real
+response must be grounded in that evaluation's evidence.
+
+```json
+{
+  "success": true,
+  "data": {
+    "fraudExplanation": {
+      "summary": "Giao dịch bị gắn cờ do nhận tiền rồi chuyển tiếp nhanh.",
+      "reasons": [
+        {
+          "ruleCode": "RAPID_PASS_THROUGH",
+          "description": "Tài khoản chuyển đi 97% số tiền vừa nhận sau 90 giây.",
+          "evidenceTransactionRefs": ["TX-IN-001", "TX-OUT-002"]
+        }
+      ]
+    },
+    "investigationRecommendations": [
+      {
+        "priority": 1,
+        "action": "Xác minh mục đích nhận tiền và chuyển tiếp.",
+        "rationale": "Chuỗi giao dịch có dấu hiệu tài khoản trung gian.",
+        "evidenceTransactionRefs": ["TX-IN-001", "TX-OUT-002"],
+        "dataToCollect": ["Chứng từ giao dịch", "Quan hệ giữa các bên"]
+      }
+    ]
+  },
+  "message": "Request completed successfully",
+  "timestamp": "2026-11-05T00:00:00Z",
+  "requestId": "example-request-id"
+}
+```
+
+Analysis uses the original request, result and audit JSON. Reasons must cite
+matched rule codes and evidence refs belonging to that rule. Recommendations
+must cite refs in the permitted evidence set. The server validates nonempty
+fields, bounded list/text sizes and unique priorities from 1 to 5. These checks
+do not verify every narrative claim; investigation recommendations need human
+review. AI does not update scores, evaluation decisions or review statuses.
+Every triggered rule with a positive score contribution must appear in the
+explanation; an otherwise well-formed response that omits one is rejected.
+
+Migration `V5__create_fraud_ai_analysis.sql` stores one immutable analysis per
+reference in `fraud_ai_analysis`, together with a SHA-256 input snapshot hash,
+model, prompt version and creation time. Repeated POST calls return that saved
+analysis. Changing model or env configuration does not regenerate old results.
+There is no regeneration endpoint. Same-reference requests serialize within
+one JVM; across instances duplicate provider requests remain possible, while
+the database uniqueness constraint preserves one winning saved result.
+
+| HTTP | Error code | Meaning |
+| --- | --- | --- |
+| 400 | `INVALID_REQUEST` | Reference is blank or exceeds 80 characters. |
+| 401 | `UNAUTHORIZED` | Missing, invalid or expired bearer token. |
+| 403 | `ACCESS_DENIED` | Authenticated caller lacks a permitted role. |
+| 404 | `RESOURCE_NOT_FOUND` | No evaluation exists for the reference. |
+| 404 | `AI_ANALYSIS_NOT_FOUND` | Evaluation exists; analysis has not been created. |
+| 409 | `AI_ANALYSIS_NOT_ELIGIBLE` | Decision is not `FRAUD`, matched evidence is missing, or serialized input exceeds the current 150,000-character limit. |
+| 502 | `AI_PROVIDER_ERROR` | OpenRouter/network failure, unsupported schema/model, truncated or malformed output, or output failed grounding validation. |
+| 503 | `AI_PROVIDER_UNAVAILABLE` | Backend API key or model is not configured. |
+| 504 | `AI_PROVIDER_TIMEOUT` | OpenRouter request exceeded the configured timeout. |
+
+Provider response bodies and API keys are not returned to callers. Failed
+generation is not saved; retry POST to try again. See
+[AI fraud analysis setup](ai-fraud-analysis.md) for environment configuration,
+frontend behavior and a live demo checklist.
 ## Background source evaluation
 
 V8/V9 use `risk_transfer_history` for both evaluators, with no separate

@@ -105,9 +105,24 @@ The API is stateless. Login returns a 15 minute access token and a seven day ref
 | Fraud ingest | `POST /api/v1/fraud-transactions` | Trusted producer with `X-Service-Token: <APP_SERVICE_TOKEN>` |
 | Source transaction ingest | `POST /api/v1/transactions` | Trusted producer; saves `PENDING` for background evaluation using `X-Service-Token` |
 | Rule-based fraud detection | `POST /api/v1/transactions/evaluate` | Trusted producer with `X-Service-Token: <APP_SERVICE_TOKEN>` |
+| AI fraud analysis | `GET` / `POST /api/v1/transactions/{transactionRef}/ai-analysis` | JWT bearer token; `ADMIN` and `BANK_USER` |
 
 See [docs/api.md](docs/api.md) for request and response details. Flyway migration V3 adds the refresh-token table. The migration runs automatically on application startup after the database URL and secrets are configured.
 
+## AI fraud analysis demo
+
+The console can explain why an evaluated transaction was flagged and suggest
+investigation steps using OpenRouter. Add `OPENROUTER_API_KEY` and
+`OPENROUTER_MODEL` to the existing `backend/.env`; select a model/provider that
+supports strict JSON schema outputs. The other settings and defaults are in
+[backend/.env.example](backend/.env.example). Keep all provider secrets on the
+backend. Flyway V5 creates the analysis cache on startup.
+
+In live mode, open Transactions and use **Phân tích theo mã giao dịch** with a
+reference whose evaluation returned `decision: FRAUD`. Matching investigation
+cases also have a **Phân tích AI** tab. Demo mode displays a labeled synthetic
+example without calling OpenRouter. See the [setup and demo guide](docs/ai-fraud-analysis.md)
+for the full flow, prerequisites and troubleshooting.
 ### Background transaction scanner
 
 The optional scanner evaluates source rows in `transactions` and creates fraud cases

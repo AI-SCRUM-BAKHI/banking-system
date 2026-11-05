@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { ArrowRight, CheckCheck, Fingerprint, Network, ScanLine, ShieldAlert } from 'lucide-react'
+import { ArrowRight, CheckCheck, Fingerprint, Network, ScanLine, ShieldAlert, Sparkles } from 'lucide-react'
+import { AiAnalysisPanel } from './AiAnalysisPanel'
 import { errorMessage } from '../api/axios'
 import { useDetail, useGraph } from '../lib/queries'
 import { demoReview } from '../lib/demo'
@@ -23,7 +24,7 @@ export function CaseDrawer({
     onClose: () => void
     notify: (message: string) => void
 }) {
-    const [tab, setTab] = useState<'overview' | 'graph'>('overview')
+    const [tab, setTab] = useState<'overview' | 'graph' | 'ai'>('overview')
     const detail = useDetail(session.mode, id)
     const graph = useGraph(session.mode, id)
     const client = useQueryClient()
@@ -59,6 +60,14 @@ export function CaseDrawer({
                             {session.mode === 'demo' && <Pill tone="neutral">Hồ sơ tổng hợp</Pill>}
                         </div>
                         <div className="drawer-tabs">
+                            <button
+                                className={tab === 'ai' ? 'active' : ''}
+                                onClick={() => setTab('ai')}
+                                aria-pressed={tab === 'ai'}
+                            >
+                                <Sparkles size={16} />
+                                Phân tích AI
+                            </button>
                             <button className={tab === 'overview' ? 'active' : ''} onClick={() => setTab('overview')}>
                                 <ScanLine size={16} />
                                 Tổng quan & tín hiệu
@@ -68,7 +77,14 @@ export function CaseDrawer({
                                 Dòng tiền
                             </button>
                         </div>
-                        {tab === 'overview' ? (
+                        {tab === 'ai' ? (
+                            <AiAnalysisPanel
+                                key={detail.data.transactionRef}
+                                transactionRef={detail.data.transactionRef}
+                                mode={session.mode}
+                                demoDetail={detail.data}
+                            />
+                        ) : tab === 'overview' ? (
                             <>
                                 <div className="case-amount">
                                     <span>GIÁ TRỊ GIAO DỊCH</span>

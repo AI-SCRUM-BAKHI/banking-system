@@ -1,0 +1,12 @@
+allprojects {
+    tasks.withType(Checkstyle).configureEach {
+        minHeapSize = '32m'
+        maxHeapSize = '128m'
+    }
+    tasks.withType(Test).configureEach {
+        minHeapSize = '32m'
+        maxHeapSize = '192m'
+        maxParallelForks = 1
+        jvmArgs '-XX:ActiveProcessorCount=2', '-XX:+UseSerialGC'
+    }
+}
