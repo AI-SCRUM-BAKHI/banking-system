@@ -6,6 +6,7 @@ import com.scrumai.fraud.service.RiskModels.Context;
 import com.scrumai.fraud.service.RiskModels.Coverage;
 import com.scrumai.fraud.service.RiskModels.Evaluation;
 import com.scrumai.fraud.service.RiskModels.Transfer;
+import com.scrumai.fraud.service.RiskRuleConfiguration;
 import com.scrumai.fraud.service.RiskScoreEngine;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,18 +15,30 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import tools.jackson.databind.ObjectMapper;
 
 @Repository
 public class TransactionScanRepository {
+  private final RiskRuleConfiguration config;
   private final JdbcTemplate jdbc;
   private final ObjectMapper mapper;
   private final RiskEvaluationRepository evaluations;
 
   public TransactionScanRepository(
       JdbcTemplate jdbc, ObjectMapper mapper, RiskEvaluationRepository evaluations) {
+    this(jdbc, mapper, evaluations, new RiskRuleConfiguration(RiskScoreEngine.VERSION));
+  }
+
+  @Autowired
+  public TransactionScanRepository(
+      JdbcTemplate jdbc,
+      ObjectMapper mapper,
+      RiskEvaluationRepository evaluations,
+      RiskRuleConfiguration config) {
+    this.config = config;
     this.jdbc = jdbc;
     this.mapper = mapper;
     this.evaluations = evaluations;
@@ -71,7 +84,7 @@ public class TransactionScanRepository {
             (rs, row) -> contextTransfer(rs),
             tx.fromAccountRef(),
             tx.transactionRef(),
-            Timestamp.from(t.minusSeconds(30L * 86400 + 3600)),
+            Timestamp.from(t.minusSeconds(config.outboundContextSeconds())),
             Timestamp.from(t),
             Timestamp.from(t),
             tx.transactionRef());
@@ -85,7 +98,7 @@ public class TransactionScanRepository {
             (rs, row) -> contextTransfer(rs),
             tx.fromAccountRef(),
             tx.transactionRef(),
-            Timestamp.from(t.minusSeconds(RiskScoreEngine.FLOW_CONTEXT_SECONDS)),
+            Timestamp.from(t.minusSeconds(config.inboundContextSeconds())),
             Timestamp.from(t),
             Timestamp.from(t));
     Boolean unknown =

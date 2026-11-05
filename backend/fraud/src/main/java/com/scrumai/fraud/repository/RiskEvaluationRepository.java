@@ -3,6 +3,7 @@ package com.scrumai.fraud.repository;
 import com.scrumai.fraud.service.RiskModels.Context;
 import com.scrumai.fraud.service.RiskModels.Coverage;
 import com.scrumai.fraud.service.RiskModels.Transfer;
+import com.scrumai.fraud.service.RiskRuleConfiguration;
 import com.scrumai.fraud.service.RiskScoreEngine;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,16 +12,25 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import tools.jackson.databind.ObjectMapper;
 
 @Repository
 public class RiskEvaluationRepository {
+  private final RiskRuleConfiguration config;
   private final JdbcTemplate jdbc;
   private final ObjectMapper mapper;
 
   public RiskEvaluationRepository(JdbcTemplate jdbc, ObjectMapper mapper) {
+    this(jdbc, mapper, new RiskRuleConfiguration(RiskScoreEngine.VERSION));
+  }
+
+  @Autowired
+  public RiskEvaluationRepository(
+      JdbcTemplate jdbc, ObjectMapper mapper, RiskRuleConfiguration config) {
+    this.config = config;
     this.jdbc = jdbc;
     this.mapper = mapper;
   }
@@ -67,7 +77,7 @@ public class RiskEvaluationRepository {
                     instant(rs, "inbound_posted_through"),
                     rs.getBoolean("posting_complete")),
             account);
-    // Split needs thirty days before its first member, which may be one hour before t.
+    // Include baseline before the first possible split member and all configured rolling windows.
     List<Transfer> outbound =
         jdbc.query(
             """
@@ -81,7 +91,7 @@ public class RiskEvaluationRepository {
         """,
             (rs, row) -> transfer(rs),
             account,
-            Timestamp.from(t.minusSeconds(30L * 86400 + 3600).minusSeconds(1)),
+            Timestamp.from(t.minusSeconds(config.outboundContextSeconds()).minusSeconds(1)),
             Timestamp.from(t.plusSeconds(1)));
     // Query by posting time: a long-delayed inbound may have an old transaction time.
     List<Transfer> inbound =
@@ -97,7 +107,7 @@ public class RiskEvaluationRepository {
         """,
             (rs, row) -> transfer(rs),
             account,
-            Timestamp.from(t.minusSeconds(RiskScoreEngine.FLOW_CONTEXT_SECONDS + 1)),
+            Timestamp.from(t.minusSeconds(config.inboundContextSeconds() + 1)),
             Timestamp.from(t.plusSeconds(1)));
     boolean unknown =
         jdbc

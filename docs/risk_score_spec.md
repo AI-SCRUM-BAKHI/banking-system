@@ -13,7 +13,84 @@ báo nhầm để review. Không tối ưu theo Precision hoặc F1 đơn thuầ
 F2 (đặt trọng số Recall cao hơn Precision) và tỷ lệ phát hiện trên toàn bộ nhãn
 fraud, kể cả những giao dịch chưa đủ dữ liệu để kết luận.
 
+## Cấu hình tham số qua `.env`
+
+Các tham số có thể ghi đè trong `backend/.env` hoặc environment của backend.
+Backend đọc và cố định cấu hình khi khởi động; sửa `.env` cần restart. Với Docker
+Compose, chạy `bash infra/deploy.sh` theo quy trình deploy của repo để tạo lại
+container khi environment thay đổi, chờ readiness và reload frontend proxy. `docker compose restart` không cập nhật
+các biến đã truyền qua `env_file` khi container được tạo.
+
+Không khai báo biến thì dùng mặc định của profile v1/v2/v3 đã chọn, giữ hành vi
+trước đây. Không đặt biến trống. Khối dưới là mặc định **v3-recall**; không sao chép
+nguyên khối sang v1/v2 nếu muốn giữ mặc định của các profile đó.
+
+```dotenv
+APP_FRAUD_RULE_VERSION=rule-score-v3-recall
+APP_FRAUD_THRESHOLD=60
+APP_FRAUD_BASELINE_DAYS=30
+APP_FRAUD_BASELINE_MIN_COUNT=20
+APP_FRAUD_AMOUNT_SPIKE_MULTIPLIER=4
+APP_FRAUD_AMOUNT_SPIKE_SCORE=60
+APP_FRAUD_NEW_BENEFICIARY_MULTIPLIER=2.5
+APP_FRAUD_NEW_BENEFICIARY_SCORE=65
+APP_FRAUD_UNUSUAL_HOUR_START=2
+APP_FRAUD_UNUSUAL_HOUR_END=4
+APP_FRAUD_UNUSUAL_HOUR_SCORE=60
+APP_FRAUD_FREQUENCY_WINDOW_SECONDS=120
+APP_FRAUD_FREQUENCY_MIN_COUNT=2
+APP_FRAUD_FREQUENCY_SCORE=65
+APP_FRAUD_SPLIT_WINDOW_SECONDS=3600
+APP_FRAUD_SPLIT_MIN_COUNT=2
+APP_FRAUD_SPLIT_MIN_GAP_SECONDS=120
+APP_FRAUD_SPLIT_MAX_GAP_SECONDS=900
+APP_FRAUD_SPLIT_SCORE=70
+APP_FRAUD_RAPID_MIN_DELAY_SECONDS=30
+APP_FRAUD_RAPID_MAX_DELAY_SECONDS=600
+APP_FRAUD_RAPID_MIN_RATIO=0.8
+APP_FRAUD_RAPID_MAX_RATIO=1.2
+APP_FRAUD_RAPID_SCORE=65
+APP_FRAUD_MULTI_WINDOW_SECONDS=1800
+APP_FRAUD_MULTI_MIN_SOURCES=3
+APP_FRAUD_MULTI_MIN_TARGETS=1
+APP_FRAUD_MULTI_MIN_RATIO=0.4
+APP_FRAUD_MULTI_MAX_RATIO=1.2
+APP_FRAUD_MULTI_SCORE=80
+```
+
+`THRESHOLD` nằm trong 1–100; điểm từng rule nằm trong 0–100 (0 chỉ bỏ đóng góp
+điểm, không bỏ thực thi rule). `BASELINE_DAYS` nằm trong 1–365; số mẫu tối thiểu
+nằm trong 1–100.000. Frequency/split count tối thiểu là 2; multi sources tối thiểu
+là 2, targets tối thiểu là 1; các count tối đa 100.000. Cửa sổ và gap/delay nằm
+trong 1–86.400 giây. Min không vượt max; cặp giờ phải có start < end, start trong
+0–23 và end trong 1–24, không hỗ trợ cửa sổ qua nửa đêm. Split window phải lớn
+hơn `(count−1) × minGap` do cận trái cửa sổ mở. Multiplier/ratio phải dương,
+không quá 1.000, tối đa 6 chữ số thập phân và 10 chữ số có nghĩa. Cấu hình sai
+làm backend không khởi động, với thông báo tên biến cần sửa.
+
+Engine và hai repository dùng chung một cấu hình: tăng cửa sổ sẽ tăng lookback
+khi query, gồm baseline trước giao dịch đầu của split. Context inbound vẫn tải
+ít nhất superset 30 phút như trước; rule lọc theo cửa sổ thực tế. Coverage vẫn
+phải được xác nhận đủ cho cửa sổ đã cấu hình.
+
+Mỗi đánh giá mới lưu snapshot tất cả tham số hiệu lực trong
+`audit.configuration.parameters`, cùng `ruleVersion`, weights và groups. Cùng
+một profile có thể có nhiều snapshot cấu hình khác nhau; phải đối chiếu snapshot
+khi so sánh kết quả. Các số benchmark ở tài liệu này dùng mặc định của profile,
+không áp dụng mặc nhiên cho bộ tham số đã chỉnh.
+
+Chưa có API/admin UI hoặc hot reload. Công thức median, grouping/suppression,
+cap 100, risk levels 30/60/80, timezone Việt Nam, logic phân biệt các profile,
+coverage và chống lấy dữ liệu tương lai vẫn giữ trong Java. Ví dụ giảm threshold
+xuống 50 có thể tạo FRAUD với mức MEDIUM; risk level không tự đổi theo threshold.
+
+Đổi cấu hình chỉ tác động đánh giá mới. API gọi lại cùng ref/dữ liệu vẫn trả
+kết quả đã lưu; source COMPLETED không tự chạy lại. Muốn đánh giá lại cần reset
+source theo quy trình vận hành, giữ lịch sử cũ và review.
+
 ## Chính sách online
+
+Các ngưỡng dưới đây là mặc định v3-recall khi không có override.
 
 Ngưỡng fraud giữ **60**, cap score 100, risk levels và suppression trong từng
 nhóm giữ nguyên. Rule chỉ dùng thông tin đã biết tại transactionTime hiện tại.

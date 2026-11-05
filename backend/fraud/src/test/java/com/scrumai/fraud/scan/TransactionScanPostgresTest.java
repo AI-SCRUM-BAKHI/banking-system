@@ -14,6 +14,7 @@ import com.scrumai.fraud.controller.TransactionController;
 import com.scrumai.fraud.dto.EvaluationRequest;
 import com.scrumai.fraud.repository.RiskEvaluationRepository;
 import com.scrumai.fraud.service.IpIntelligenceService;
+import com.scrumai.fraud.service.RiskRuleConfiguration;
 import com.scrumai.fraud.service.RiskScoreEngine;
 import com.scrumai.fraud.service.TransactionEvaluationService;
 import com.scrumai.fraud.service.TransactionIngestService;
@@ -33,6 +34,7 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.mock.env.MockEnvironment;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -249,6 +251,79 @@ class TransactionScanPostgresTest {
                 Integer.class,
                 schema))
         .isGreaterThanOrEqualTo(8);
+  }
+
+  @Test
+  void configuredWindowsLoadFullContextForApiAndJobAndPersistEffectiveSettings() {
+    var config =
+        new RiskRuleConfiguration(
+            RiskScoreEngine.V3_RECALL,
+            new MockEnvironment()
+                .withProperty("APP_FRAUD_BASELINE_DAYS", "60")
+                .withProperty("APP_FRAUD_SPLIT_WINDOW_SECONDS", "7200")
+                .withProperty("APP_FRAUD_RAPID_MAX_DELAY_SECONDS", "7200")
+                .withProperty("APP_FRAUD_RAPID_MAX_RATIO", "1.5")
+                .withProperty("APP_FRAUD_UNUSUAL_HOUR_SCORE", "0"));
+    insert("old-context", "A", "KNOWN", 100, T.minusSeconds(60L * 86400 + 3600), null);
+    insert("credit", "C", "A", 100, T.minusSeconds(4000), T.minusSeconds(3600));
+    insert("future-credit", "D", "A", 100, T, T.plusSeconds(1));
+    insert("current", "A", "B", 150, T, null);
+    jdbc.update(
+        """
+        INSERT INTO risk_account_coverage(account_id, outbound_from, outbound_through,
+          inbound_posted_from, inbound_posted_through, posting_complete)
+        VALUES ('A', ?, ?, ?, ?, TRUE)
+        """,
+        java.sql.Timestamp.from(T.minusSeconds(90L * 86400)),
+        java.sql.Timestamp.from(T),
+        java.sql.Timestamp.from(T.minusSeconds(90L * 86400)),
+        java.sql.Timestamp.from(T));
+    jdbc.update(
+        """
+        INSERT INTO risk_transfer_history(ingest_order, transaction_ref, sender_account_id,
+          receiver_account_id, amount_vnd, currency, transaction_time, posted_at,
+          evaluated_at, request_json, result_json, audit_json)
+        SELECT row_number() OVER (ORDER BY transaction_time, transaction_ref), transaction_ref,
+          from_account_ref, to_account_ref, amount, currency, transaction_time, posted_at,
+          transaction_time + INTERVAL '1 day',
+          json_build_object('transactionRef', transaction_ref,
+            'senderAccountId', from_account_ref, 'receiverAccountId', to_account_ref,
+            'amountVnd', amount, 'currency', currency,
+            'transactionTime', transaction_time, 'postedAt', posted_at)::text, '{}', '{}'
+        FROM transactions WHERE transaction_ref <> 'current'
+        """);
+    jdbc.update("UPDATE risk_ingest_state SET last_ingest_order=3");
+    var mapper = JsonMapper.builder().build();
+    var history = new RiskEvaluationRepository(jdbc, mapper, config);
+    var scan = new TransactionScanRepository(jdbc, mapper, history, config);
+    var current =
+        new com.scrumai.fraud.service.RiskModels.Transfer(
+            "current", "A", "B", BigDecimal.valueOf(150), "VND", T, null);
+    var apiContext = history.context(current, history.lock());
+    var jobContext = scan.context(scan.lock("current").orElseThrow());
+    for (var context : List.of(apiContext, jobContext)) {
+      assertThat(context.outbound())
+          .extracting(com.scrumai.fraud.service.RiskModels.Transfer::transactionRef)
+          .containsExactly("old-context");
+      assertThat(context.inbound())
+          .extracting(com.scrumai.fraud.service.RiskModels.Transfer::transactionRef)
+          .containsExactly("credit");
+      assertThat(new RiskScoreEngine(config).evaluate(current, context).result().isFraud())
+          .isTrue();
+    }
+    var configuredProcessor =
+        new TransactionScanProcessor(
+            scan, new RiskScoreEngine(config), mapper, new DataSourceTransactionManager(source));
+    assertThat(configuredProcessor.process("current")).isEqualTo("COMPLETED");
+    assertThat(value("current", "risk_score")).isEqualTo("65.00");
+    var audit =
+        mapper.readTree(
+            jdbc.queryForObject(
+                "SELECT audit_json FROM risk_transfer_history WHERE transaction_ref='current'",
+                String.class));
+    assertThat(audit.get("configuration").get("parameters").get("RAPID_MAX_DELAY_SECONDS").asInt())
+        .isEqualTo(7200);
+    assertThat(count("fraud_transactions")).isEqualTo(1);
   }
 
   @Test
