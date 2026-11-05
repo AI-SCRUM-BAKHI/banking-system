@@ -90,6 +90,29 @@ class OpenRouterClientTest {
   }
 
   @Test
+  void canDisableOptionalReasoningToReserveTokensForTheJsonAnswer() throws Exception {
+    AtomicReference<String> request = new AtomicReference<>();
+    String json = mapper.writeValueAsString(AiAnalysisServiceTest.analysis("TX-1", "UNUSUAL_HOUR"));
+    String body =
+        mapper.writeValueAsString(
+            Map.of(
+                "choices",
+                List.of(Map.of("finish_reason", "stop", "message", Map.of("content", json)))));
+    client(200, body, request);
+    OpenRouterClient configured =
+        new OpenRouterClient(
+            "test-key",
+            "test/model",
+            "http://127.0.0.1:" + server.getAddress().getPort(),
+            5,
+            mapper,
+            true);
+    configured.analyze("evidence");
+    assertEquals(
+        mapper.readTree("{\"enabled\":false}"), mapper.readTree(request.get()).path("reasoning"));
+  }
+
+  @Test
   void hidesProviderErrorBody() throws Exception {
     // Both strict and fallback calls return 401 → gives up
     OpenRouterClient client = client(401, "SECRET-KEY provider failure", new AtomicReference<>());

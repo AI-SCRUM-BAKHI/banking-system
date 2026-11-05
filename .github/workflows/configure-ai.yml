@@ -1,0 +1,51 @@
+name: Configure AI analysis
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: Structured-output model with optional reasoning
+        required: true
+        default: nvidia/nemotron-3.5-super-vl:free
+        type: string
+      timeout_seconds:
+        description: Provider timeout in seconds (1 to 120)
+        required: true
+        default: '60'
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: configure-ai-provider
+  cancel-in-progress: false
+
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure and verify AI provider on EC2
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          AI_OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          AI_OPENROUTER_MODEL: ${{ inputs.model }}
+          AI_OPENROUTER_BASE_URL: https://openrouter.ai/api/v1
+          AI_OPENROUTER_TIMEOUT_SECONDS: ${{ inputs.timeout_seconds }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          envs: AI_OPENROUTER_API_KEY,AI_OPENROUTER_MODEL,AI_OPENROUTER_BASE_URL,AI_OPENROUTER_TIMEOUT_SECONDS
+          script_stop: true
+          script: |
+            set -e
+            TARGET_DIR="${{ secrets.TARGET_DIR }}"
+            if [ -z "$TARGET_DIR" ]; then TARGET_DIR="$HOME/banking-system"; fi
+            cd "$TARGET_DIR"
+            git fetch origin main
+            git merge --ff-only origin/main
+            python3 infra/configure_ai.py
+            bash infra/deploy.sh
+            python3 infra/configure_ai.py --verify-container scrum-ai-backend

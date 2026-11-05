@@ -23,13 +23,14 @@ filling all required values. Do not replace an already configured env file.
 
 ```dotenv
 OPENROUTER_API_KEY=your-openrouter-api-key
-OPENROUTER_MODEL=openai/gpt-4o-mini
+OPENROUTER_MODEL=nvidia/nemotron-3.5-super-vl:free
 OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 OPENROUTER_TIMEOUT_SECONDS=60
+OPENROUTER_DISABLE_REASONING=true
 ```
 
 The application defaults the key and model to empty when not configured; the
-example uses `openai/gpt-4o-mini`, listed with `structured_outputs` support in
+example uses `nvidia/nemotron-3.5-super-vl:free`, listed with `structured_outputs` support in
 the [OpenRouter model catalog](https://openrouter.ai/api/v1/models).
 You can substitute another model with the same capability.
 `BASE_URL` defaults to the address above;
@@ -152,3 +153,25 @@ included in this demo.
 - [OpenRouter chat completions API](https://openrouter.ai/docs/api/api-reference/chat/send-chat-completion-request)
 - [OpenRouter structured outputs](https://openrouter.ai/docs/features/structured-outputs)
 - [Backend API contract](api.md#ai-fraud-analysis)
+
+## Configure the deployed EC2 backend
+
+The application reads `backend/.env` through Docker Compose. A root `.env`, shell
+export, or local file is not automatically copied to EC2 by the normal deploy job.
+
+Store the provider key in the repository Actions secret `OPENROUTER_API_KEY`, then
+run **Configure AI analysis** from GitHub Actions. The workflow updates only the
+five OpenRouter settings in the existing server environment, preserves database
+and authentication settings, recreates services and verifies that the running
+backend container received every AI setting. It never prints the key.
+
+The tested free model supports disabling optional reasoning. Set
+`OPENROUTER_DISABLE_REASONING=true` with this model so the 2,500-token response
+budget is available for the JSON report. Without this setting a reasoning model
+can consume the entire budget internally and return `finish_reason=length` with
+empty content. Leave this option false for models that do not accept reasoning
+controls. Free providers can also return upstream rate limits.
+
+If a model exposes only `response_format` but not `structured_outputs`, the strict
+schema request may fail routing with HTTP 404. Successful `/key` authentication
+alone does not verify model/schema compatibility.

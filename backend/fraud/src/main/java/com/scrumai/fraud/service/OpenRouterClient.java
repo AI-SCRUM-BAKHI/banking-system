@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import tools.jackson.core.JacksonException;
@@ -30,13 +31,22 @@ public class OpenRouterClient {
   private final Duration timeout;
   private final ObjectMapper mapper;
   private final HttpClient http;
+  private final boolean disableReasoning;
 
+  public OpenRouterClient(
+      String apiKey, String model, String baseUrl, int timeoutSeconds, ObjectMapper mapper) {
+    this(apiKey, model, baseUrl, timeoutSeconds, mapper, false);
+  }
+
+  @Autowired
   public OpenRouterClient(
       @Value("${app.ai.openrouter.api-key:}") String apiKey,
       @Value("${app.ai.openrouter.model:}") String model,
       @Value("${app.ai.openrouter.base-url:https://openrouter.ai/api/v1}") String baseUrl,
       @Value("${app.ai.openrouter.timeout-seconds:60}") int timeoutSeconds,
-      ObjectMapper mapper) {
+      ObjectMapper mapper,
+      @Value("${app.ai.openrouter.disable-reasoning:false}") boolean disableReasoning) {
+    this.disableReasoning = disableReasoning;
     this.apiKey = apiKey;
     this.model = model;
     this.endpoint = URI.create(baseUrl.replaceAll("/+$", "") + "/chat/completions");
@@ -130,6 +140,10 @@ public class OpenRouterClient {
               Map.of("name", "fraud_analysis", "strict", true, "schema", schema())));
     } else {
       body.put("response_format", Map.of("type", "json_object"));
+    }
+
+    if (disableReasoning) {
+      body.put("reasoning", Map.of("enabled", false));
     }
 
     HttpRequest request =
