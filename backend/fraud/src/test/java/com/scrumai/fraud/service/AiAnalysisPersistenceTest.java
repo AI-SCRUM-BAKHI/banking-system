@@ -23,7 +23,7 @@ class AiAnalysisPersistenceTest {
                 ""));
     for (String name :
         new String[] {
-          "V4__create_risk_evaluation_context.sql", "V5__create_fraud_ai_analysis.sql"
+          "V4__create_risk_evaluation_context.sql", "V10__create_fraud_ai_analysis.sql"
         }) {
       String migration =
           new ClassPathResource("db/migration/" + name)

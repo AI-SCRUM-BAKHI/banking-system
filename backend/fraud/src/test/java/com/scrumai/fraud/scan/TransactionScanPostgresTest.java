@@ -73,7 +73,8 @@ class TransactionScanPostgresTest {
             "V6__create_dataset_import_tables.sql",
             "V7__create_customers.sql",
             "V8__consolidate_transaction_data.sql",
-            "V9__remove_redundant_transaction_tables.sql")) {
+            "V9__remove_redundant_transaction_tables.sql",
+            "V10__create_fraud_ai_analysis.sql")) {
       jdbc.execute(
           new ClassPathResource("db/migration/" + file).getContentAsString(StandardCharsets.UTF_8));
     }

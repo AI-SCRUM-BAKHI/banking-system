@@ -188,7 +188,7 @@ review. AI does not update scores, evaluation decisions or review statuses.
 Every triggered rule with a positive score contribution must appear in the
 explanation; an otherwise well-formed response that omits one is rejected.
 
-Migration `V5__create_fraud_ai_analysis.sql` stores one immutable analysis per
+Migration `V10__create_fraud_ai_analysis.sql` stores one immutable analysis per
 reference in `fraud_ai_analysis`, together with a SHA-256 input snapshot hash,
 model, prompt version and creation time. Repeated POST calls return that saved
 analysis. Changing model or env configuration does not regenerate old results.

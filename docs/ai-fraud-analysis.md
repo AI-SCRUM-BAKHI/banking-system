@@ -50,7 +50,7 @@ key is sent only by the backend.
 
 Docker Compose already reads `backend/.env` through `env_file`. Recreate the
 backend container after changing its configuration. Flyway automatically runs
-V5 on application startup to create `fraud_ai_analysis`; no manual table
+V10 on application startup to create `fraud_ai_analysis`; no manual table
 creation is needed.
 
 ## Prepare a live transaction

@@ -3,6 +3,7 @@ package com.scrumai.fraud.repository;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Optional;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -37,6 +38,10 @@ public class AiAnalysisRepository {
   }
 
   public void save(String ref, String json, String hash, String model, String version) {
+    if (snapshot(ref).isEmpty()) {
+      throw new DataIntegrityViolationException(
+          "Transaction " + ref + " does not exist in risk transfer history");
+    }
     jdbc.update(
         """
         INSERT INTO fraud_ai_analysis
