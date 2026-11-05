@@ -1,6 +1,6 @@
 import { afterEach, expect, it, vi } from 'vitest'
 import { apiClient } from '../api/axios'
-import { createAiAnalysis, getAiAnalysis, getFraudTransactions } from './fraud.service'
+import { createAiAnalysis, getAiAnalysis, getFraudTransactions, getIpIntelligence } from './fraud.service'
 
 afterEach(() => vi.restoreAllMocks())
 it('encodes transaction refs and gives AI generation a longer timeout', async () => {
